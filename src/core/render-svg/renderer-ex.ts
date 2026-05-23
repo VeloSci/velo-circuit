@@ -1,8 +1,10 @@
 import type { EditableGraph, ElementNode, Connection } from '../domain/graph.js';
+import { getJunctionHub } from '../domain/graph.js';
 import type { CircuitDocument, ViewportState } from '../domain/document.js';
 import type { RenderTheme } from './symbols.js';
 import { buildSvgElementSymbol, buildParallelSymbol, buildSeriesSymbol, DEFAULT_THEME } from './symbols.js';
-import { getTheme, buildThemeCSS, type ThemeMode } from './themes.js';
+import { getTheme, buildThemeCSS, buildPreviewThemeCSS, type ThemeMode, type ThemeCSSOptions } from './themes.js';
+import { renderDslToSvg, type ConnectionStyle } from './renderer.js';
 
 export interface InteractionOverlay {
   type: 'hover' | 'selected' | 'error' | 'warning' | 'focus';
@@ -56,6 +58,7 @@ function isJunctionNode(node: ElementNode): boolean {
 
 function buildNodeElement(
   node: ElementNode,
+  graph: EditableGraph,
   theme: RenderTheme,
   isSelected: boolean,
   isFocused: boolean,
@@ -67,12 +70,10 @@ function buildNodeElement(
   const h = node.height;
   const { strokeWidth, colors } = theme;
 
-  // Junction nodes render as dots
   if (isJunctionNode(node)) {
-    const cx = x + w / 2;
-    const cy = y + h / 2;
+    const hub = getJunctionHub(node, graph);
     return `<g id="node-${node.nodeId}" class="circuit-junction" data-node-id="${node.nodeId}">
-      <circle cx="${cx}" cy="${cy}" r="3" fill="${colors.stroke}" />
+      <circle cx="${hub.x}" cy="${hub.y}" r="3" fill="${colors.stroke}" />
     </g>`;
   }
 
@@ -187,7 +188,7 @@ export function renderCircuitEx(
   for (const node of graph.nodes.values()) {
     const isSelected = options.selectedNodeIds?.has(node.nodeId) ?? false;
     const isFocused = node.nodeId === options.focusedNodeId;
-    nodeElements.push(buildNodeElement(node, resolvedTheme, isSelected, isFocused, options.showHandles ?? false));
+    nodeElements.push(buildNodeElement(node, graph, resolvedTheme, isSelected, isFocused, options.showHandles ?? false));
   }
 
   for (const conn of graph.connections) {
@@ -244,7 +245,50 @@ export function extractSvgSnapshot(graph: EditableGraph, viewport: ViewportState
   return renderCircuitEx(graph, viewport, opts);
 }
 
-export function exportSvgWithStyles(svg: string, theme: RenderTheme): string {
-  const styleBlock = `<style>${buildThemeCSS(theme)}</style>`;
+export function exportSvgWithStyles(
+  svg: string,
+  theme: RenderTheme,
+  cssOptions: ThemeCSSOptions = {},
+): string {
+  const styleBlock = `<style>${buildThemeCSS(theme, cssOptions)}</style>`;
   return svg.replace('</svg>', `${styleBlock}</svg>`);
+}
+
+export function exportPreviewSvgWithStyles(
+  svg: string,
+  theme: RenderTheme,
+  cssOptions: ThemeCSSOptions = {},
+): string {
+  const styleBlock = `<style>${buildPreviewThemeCSS(theme, cssOptions)}</style>`;
+  return svg.replace('</svg>', `${styleBlock}</svg>`);
+}
+
+export interface DslPreviewOptions extends ThemeCSSOptions {
+  theme?: RenderTheme;
+  themeMode?: ThemeMode;
+  connectionStyle?: ConnectionStyle;
+  showGrid?: boolean;
+  showLabels?: boolean;
+  showParams?: boolean;
+  width?: number | string;
+  height?: number | string;
+}
+
+/** Render DSL to a standalone SVG with embedded theme CSS (no editor shell). */
+export function renderDslPreviewSvg(dsl: string, options: DslPreviewOptions = {}): string {
+  const themeMode = options.themeMode ?? 'light';
+  const colorMode = options.colorMode ?? 'multicolor';
+  const theme = options.theme ?? getTheme(themeMode);
+  const svg = renderDslToSvg(dsl, {
+    theme,
+    preview: true,
+    connectionStyle: options.connectionStyle,
+    showGrid: options.showGrid,
+    showLabels: options.showLabels,
+    showParams: options.showParams,
+    width: options.width ?? '100%',
+    height: options.height ?? 'auto',
+  });
+  if (!svg) return '';
+  return exportPreviewSvgWithStyles(svg, theme, { colorMode, themeMode });
 }

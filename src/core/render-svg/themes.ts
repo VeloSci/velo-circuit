@@ -48,7 +48,65 @@ export function toggleTheme(current: ThemeMode): ThemeMode {
   return current === 'light' ? 'dark' : 'light';
 }
 
-export function buildThemeCSS(theme: RenderTheme): string {
+/** Standalone preview: single stroke color (theme-aware). Multicolor: per-kind colors like the editor. */
+export type SymbolColorMode = 'bicolor' | 'multicolor';
+
+export interface ThemeCSSOptions {
+  colorMode?: SymbolColorMode;
+  themeMode?: ThemeMode;
+}
+
+/** Per-kind stroke tokens — aligned with `theme.plugin.ts` editor CSS. */
+export const ELEMENT_STROKE_COLORS: Record<ThemeMode, Record<string, string>> = {
+  light: {
+    R: '#dc2626',
+    C: '#2563eb',
+    L: '#059669',
+    Q: '#d97706',
+    W: '#7c3aed',
+    Ws: '#7c3aed',
+    Wo: '#7c3aed',
+    G: '#0891b2',
+    Pdw: '#9333ea',
+    CC: '#ea580c',
+    HN: '#db2777',
+  },
+  dark: {
+    R: '#f87171',
+    C: '#60a5fa',
+    L: '#34d399',
+    Q: '#fbbf24',
+    W: '#a78bfa',
+    Ws: '#a78bfa',
+    Wo: '#a78bfa',
+    G: '#22d3ee',
+    Pdw: '#c084fc',
+    CC: '#fb923c',
+    HN: '#f472b6',
+  },
+};
+
+export function buildElementStrokeCSS(themeMode: ThemeMode, scope = ''): string {
+  const colors = ELEMENT_STROKE_COLORS[themeMode];
+  const node = scope ? `${scope} .circuit-node` : '.circuit-node';
+  const rules: string[] = [
+    `${node}[data-kind="R"] { --ce-R-stroke: ${colors.R}; }`,
+    `${node}[data-kind="C"] { --ce-C-stroke: ${colors.C}; }`,
+    `${node}[data-kind="L"] { --ce-L-stroke: ${colors.L}; }`,
+    `${node}[data-kind="Q"] { --ce-Q-stroke: ${colors.Q}; }`,
+    `${node}[data-kind="W"], ${node}[data-kind="Ws"], ${node}[data-kind="Wo"] { --ce-W-stroke: ${colors.W}; --ce-Ws-stroke: ${colors.Ws}; --ce-Wo-stroke: ${colors.Wo}; }`,
+    `${node}[data-kind="G"] { --ce-G-stroke: ${colors.G}; }`,
+    `${node}[data-kind="Pdw"] { --ce-Pdw-stroke: ${colors.Pdw}; }`,
+    `${node}[data-kind="CC"] { --ce-CC-stroke: ${colors.CC}; }`,
+    `${node}[data-kind="HN"] { --ce-HN-stroke: ${colors.HN}; }`,
+  ];
+  return rules.join('\n    ');
+}
+
+export function buildThemeCSS(theme: RenderTheme, options: ThemeCSSOptions = {}): string {
+  const { colorMode = 'multicolor', themeMode = 'dark' } = options;
+  const elementColors = colorMode === 'multicolor' ? buildElementStrokeCSS(themeMode) : '';
+
   return `
     .circuit-editor {
       --ce-stroke: ${theme.colors.stroke};
@@ -68,22 +126,35 @@ export function buildThemeCSS(theme: RenderTheme): string {
       color: ${theme.colors.text};
       user-select: none;
     }
-    .circuit-node rect { stroke: var(--ce-stroke); fill: var(--ce-fill); }
-    .circuit-node:hover rect { stroke: var(--ce-highlight); }
-    .circuit-node.selected rect { stroke: var(--ce-highlight); stroke-width: calc(var(--ce-stroke-width) * 1.5); }
+    .circuit-node .node-hit { fill: transparent; stroke: none; }
+    .circuit-node .node-bg { fill: none; }
+    .circuit-node:hover .node-bg { stroke: var(--ce-highlight); }
+    .circuit-node.selected .node-bg { stroke: var(--ce-highlight); stroke-width: calc(var(--ce-stroke-width) * 1.5); }
     .circuit-node text { fill: var(--ce-text); font-weight: 500; }
     .circuit-connection path { stroke: var(--ce-stroke); fill: none; }
     .circuit-junction circle { fill: var(--ce-stroke); }
-    
-    /* Element-specific colors for extra wow factor */
-    .circuit-node[data-kind="R"] { --ce-R-stroke: #f87171; }
-    .circuit-node[data-kind="C"] { --ce-C-stroke: #60a5fa; }
-    .circuit-node[data-kind="L"] { --ce-L-stroke: #34d399; }
-    .circuit-node[data-kind="Q"] { --ce-Q-stroke: #fbbf24; }
-    .circuit-node[data-kind="W"], .circuit-node[data-kind="Ws"], .circuit-node[data-kind="Wo"] { --ce-W-stroke: #a78bfa; --ce-Ws-stroke: #a78bfa; --ce-Wo-stroke: #a78bfa; }
-    .circuit-node[data-kind="G"] { --ce-G-stroke: #22d3ee; }
-    .circuit-node[data-kind="Pdw"] { --ce-Pdw-stroke: #c084fc; }
-    .circuit-node[data-kind="CC"] { --ce-CC-stroke: #fb923c; }
-    .circuit-node[data-kind="HN"] { --ce-HN-stroke: #f472b6; }
+    ${elementColors}
+  `.trim();
+}
+
+/** Minimal CSS for static documentation previews — no selection chrome or opaque background. */
+export function buildPreviewThemeCSS(theme: RenderTheme, options: ThemeCSSOptions = {}): string {
+  const { colorMode = 'multicolor', themeMode = 'dark' } = options;
+  const elementColors = colorMode === 'multicolor' ? buildElementStrokeCSS(themeMode, '.circuit-preview') : '';
+
+  return `
+    .circuit-preview {
+      --ce-stroke: ${theme.colors.stroke};
+      --ce-text: ${theme.colors.text};
+      --ce-stroke-width: ${theme.strokeWidth};
+      --ce-font-size: ${theme.fontSize}px;
+      --ce-font-family: ${theme.fontFamily};
+      background: transparent;
+      color: ${theme.colors.text};
+    }
+    .circuit-preview .circuit-node text { fill: var(--ce-text); font-weight: 500; }
+    .circuit-preview .circuit-connection path { stroke: var(--ce-stroke); fill: none; }
+    .circuit-preview .circuit-junction circle { fill: var(--ce-stroke); }
+    ${elementColors}
   `.trim();
 }
