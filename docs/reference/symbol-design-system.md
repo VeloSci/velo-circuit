@@ -29,9 +29,14 @@ Canonical rules for the 11 Boukamp element symbols rendered by `buildSvgElementS
 ## Connections (edges)
 
 - Stroke width matches `theme.strokeWidth` (2.0).
-- Color: global `--ce-stroke` (not per-kind).
+- Color: global `--ce-stroke` on wires; per-kind `--ce-{kind}-stroke` on symbols when `colorMode: 'multicolor'`.
+- Default routing: **curved** Bézier paths (matches the editor). Optional **orthogonal** right-angle paths via `connectionStyle: 'orthogonal'`.
 - `vector-effect: non-scaling-stroke` on connection paths.
-- Hover: `calc(var(--ce-stroke-width, 2) * 1.25)`.
+
+## Junction dots
+
+- Filled circle `r=3` at parallel split/merge points.
+- Positioned at the **wire hub port** (`getJunctionHub()`), not the geometric center of the junction box — so dots align with curved and orthogonal wire convergence.
 
 ## Per-kind relationships
 

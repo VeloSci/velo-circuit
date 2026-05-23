@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Velo Circuit Editor
   text: Framework-agnostic SVG circuit editor for electrochemical impedance spectroscopy
-  tagline: No external dependencies · Pure SVG · TypeScript · 195 tests passing
+  tagline: No external dependencies · Pure SVG · TypeScript · 203 tests passing
   actions:
     - theme: brand
       text: Get Started
@@ -34,5 +34,5 @@ features:
     details: Full type safety in strict mode with zero type errors across the entire codebase.
   - icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"><defs><linearGradient id="gf6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4cc9f0"/><stop offset="100%" style="stop-color:#4361ee"/></linearGradient><filter id="glow6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><style>@keyframes pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } } .check { transform-origin: 32px 32px; animation: pop 2s ease-in-out infinite; }</style></defs><path d="M 12 32 A 20 20 0 0 1 52 32" stroke="url(#gf6)" stroke-width="1" stroke-dasharray="2 4" opacity="0.5"/><circle cx="32" cy="32" r="22" stroke="url(#gf6)" stroke-width="2" opacity="0.3"/><circle cx="32" cy="32" r="14" stroke="url(#gf6)" stroke-width="2.5" filter="url(#glow6)"/><g class="check"><path d="M 26 34 L 30 38 L 40 26" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow6)"/></g><circle cx="32" cy="10" r="2" fill="#4cc9f0" filter="url(#glow6)"/><circle cx="32" cy="54" r="2" fill="#4361ee" filter="url(#glow6)"/><circle cx="10" cy="32" r="2" fill="#4cc9f0" filter="url(#glow6)"/><circle cx="54" cy="32" r="2" fill="#4361ee" filter="url(#glow6)"/></svg>'
     title: Test Coverage
-    details: 195 tests covering lexer, parser, serializer, layout, symbols, renderer, editor, grid, and integration — all 11 element kinds.
+    details: 203 tests covering lexer, parser, serializer, layout, symbols, renderer, editor, grid, and integration — all 11 element kinds.
 ---
