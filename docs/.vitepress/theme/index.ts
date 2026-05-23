@@ -3,6 +3,7 @@ import type { Theme } from 'vitepress';
 import CircuitPlayground from '../components/CircuitPlayground.vue';
 import GridPlayground from '../components/GridPlayground.vue';
 import SymbolGallery from '../components/SymbolGallery.vue';
+import CircuitSvgPreview from '../components/CircuitSvgPreview.vue';
 import './style.css';
 
 export default {
@@ -11,5 +12,6 @@ export default {
     app.component('CircuitPlayground', CircuitPlayground);
     app.component('GridPlayground', GridPlayground);
     app.component('SymbolGallery', SymbolGallery);
+    app.component('CircuitSvgPreview', CircuitSvgPreview);
   },
 } satisfies Theme;
