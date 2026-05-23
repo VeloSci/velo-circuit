@@ -107,7 +107,7 @@ Clean up an editor instance:
 
 ## Complete Playground Example
 
-Full-featured circuit playground with toolbar:
+Full-featured circuit playground with a custom toolbar for all **11** palette kinds (`R`, `C`, `L`, `Q`, `W`, `Ws`, `Wo`, `G`, `Pdw`, `CC`, `HN`). The built-in editor toolbar exposes the same set.
 
 ```astro
 ---
@@ -121,6 +121,12 @@ Full-featured circuit playground with toolbar:
     <button data-element="L">Inductor (L)</button>
     <button data-element="Q">CPE (Q)</button>
     <button data-element="W">Warburg (W)</button>
+    <button data-element="Ws">Warburg Short (Ws)</button>
+    <button data-element="Wo">Warburg Open (Wo)</button>
+    <button data-element="G">Gerischer (G)</button>
+    <button data-element="Pdw">PDW (Pdw)</button>
+    <button data-element="CC">Cole-Cole (CC)</button>
+    <button data-element="HN">Havriliak-Negami (HN)</button>
     <div class="spacer"></div>
     <button id="undo-btn">Undo</button>
     <button id="redo-btn">Redo</button>
