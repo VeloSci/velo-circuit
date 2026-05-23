@@ -9,13 +9,32 @@ The core module exports all domain types, the parser bridge, and the state syste
 ```ts
 import { ElementKind } from 'velo-circuit-editor'
 
-ElementKind.Resistor      // 'R'
-ElementKind.Capacitor    // 'C'
-ElementKind.Inductor     // 'L'
-ElementKind.Cpe           // 'Q'
-ElementKind.WarburgInfinite // 'W'
-ElementKind.WarburgShort   // 'Ws'
-ElementKind.WarburgOpen    // 'Wo'
+ElementKind.Resistor                 // 'R'
+ElementKind.Capacitor                // 'C'
+ElementKind.Inductor                   // 'L'
+ElementKind.Cpe                        // 'Q'
+ElementKind.WarburgInfinite            // 'W'
+ElementKind.WarburgShort               // 'Ws'
+ElementKind.WarburgOpen                // 'Wo'
+ElementKind.Gerischer                  // 'G'
+ElementKind.ParallelDiffusionWarburg   // 'Pdw'
+ElementKind.ColeCole                   // 'CC'
+ElementKind.HavriliakNegami            // 'HN'
+```
+
+### ParamDef and ELEMENT_KINDS
+
+Each kind in `ELEMENT_KINDS` exposes `code`, `label`, `nParams`, and `params: ParamDef[]` with:
+
+- `short` — compact on-canvas label (≤2 chars, Greek when needed)
+- `title` — full tooltip / property title (e.g. `σ — Warburg coefficient (Ω·s⁻½)`)
+
+```ts
+import { ELEMENT_KINDS, ElementKind } from 'velo-circuit-editor'
+
+const def = ELEMENT_KINDS.get(ElementKind.ColeCole)!
+// def.code → 'CC'
+// def.params → [{ short: 'R', title: 'R — resistance (Ω)' }, …]
 ```
 
 ### CircuitNode
@@ -24,7 +43,7 @@ ElementKind.WarburgOpen    // 'Wo'
 import type { CircuitNode } from 'velo-circuit-editor'
 
 type CircuitNode =
-  | { type: 'element'; kind: ElementKind; id: number; paramOffset: number }
+  | { type: 'element'; kind: ElementKind; id: number; paramOffset: number; params?: number[] }
   | { type: 'series'; children: CircuitNode[] }
   | { type: 'parallel'; children: CircuitNode[] }
 ```
@@ -78,10 +97,11 @@ JSON.stringify(doc, null, 2)
 import { ELEMENT_KINDS } from 'velo-circuit-editor'
 
 for (const [kind, def] of ELEMENT_KINDS) {
-  console.log(def.code, def.label, def.nParams)
+  console.log(def.code, def.label, def.nParams, def.params.map(p => p.short))
 }
-// R Resistor 1
-// C Capacitor 1
-// Q CPE 2
-// ...
+// R Resistor 1 [ 'R' ]
+// Q CPE 2 [ 'Q₀', 'n' ]
+// W Warburg (infinite) 1 [ 'σ' ]
+// CC Cole-Cole 3 [ 'R', 'τ', 'α' ]
+// …
 ```
