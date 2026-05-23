@@ -1,12 +1,15 @@
 import { defineConfig } from 'vitepress';
 import { resolve } from 'path';
 
+const base = '/velo-circuit/';
+
 export default defineConfig({
-  base: '/velo-circuit/',
+  base,
   title: 'velo-circuit',
   description: 'Framework-agnostic SVG circuit editor based on the Boukamp DSL',
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}favicon.svg` }],
+    ['link', { rel: 'apple-touch-icon', href: `${base}favicon.svg` }],
   ],
   vite: {
     resolve: {
