@@ -1,5 +1,6 @@
 import type { CircuitNode, ElementKind } from '../domain/circuit.js';
 import { createElement, createSeries, createParallel, traverseNodes, cloneNode, nParams } from '../domain/circuit.js';
+import { assignParamOffsets } from '../parser-bridge/element-registry.js';
 
 export interface InsertOptions {
   parentId?: string | null;
@@ -284,6 +285,70 @@ function transformNode(ast: CircuitNode, targetId: string, transform: (node: Cir
   }
 
   return ast;
+}
+
+function defaultParamValue(kind: ElementKind, index: number): number {
+  if (kind === 'C' as ElementKind && index === 0) return 1e-5;
+  if (kind === 'L' as ElementKind && index === 0) return 1e-3;
+  if (index === 0) return 100;
+  if (index === 1) return 0.5;
+  return 1;
+}
+
+/**
+ * Replace an element's kind, resolving id collisions and remembering per-kind ids for this slot.
+ */
+export function changeElementKind(
+  ast: CircuitNode,
+  targetId: string,
+  newKind: ElementKind,
+): { ast: CircuitNode; newElementId: string } {
+  let newElementId = targetId;
+
+  const updated = transformNode(ast, targetId, (node) => {
+    if (node.type !== 'element') return node;
+
+    const kindIds: Partial<Record<ElementKind, number>> = {
+      ...(node.kindIds ?? {}),
+      [node.kind]: node.id,
+    };
+
+    const preferredId = kindIds[newKind] ?? node.id;
+    let resolvedId = preferredId;
+    if (isKindIdTaken(ast, newKind, preferredId, targetId)) {
+      resolvedId = generateNextElementId(ast, newKind);
+      while (isKindIdTaken(ast, newKind, resolvedId, targetId)) {
+        resolvedId += 1;
+      }
+    }
+    kindIds[newKind] = resolvedId;
+
+    const oldParams = node.params ?? [];
+    const count = nParams(newKind);
+    const params = Array.from({ length: count }, (_, i) =>
+      Number.isFinite(oldParams[i]) ? oldParams[i]! : defaultParamValue(newKind, i),
+    );
+
+    newElementId = `${newKind}${resolvedId}`;
+    return { ...node, kind: newKind, id: resolvedId, kindIds, params };
+  });
+
+  return { ast: assignParamOffsets(updated), newElementId };
+}
+
+function isKindIdTaken(
+  ast: CircuitNode,
+  kind: ElementKind,
+  id: number,
+  excludeTargetId: string,
+): boolean {
+  let taken = false;
+  traverseNodes(ast, (node) => {
+    if (node.type !== 'element') return;
+    if (`${node.kind}${node.id}` === excludeTargetId) return;
+    if (node.kind === kind && node.id === id) taken = true;
+  });
+  return taken;
 }
 
 // ──── Positional insert operations ────

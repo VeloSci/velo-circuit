@@ -5,15 +5,20 @@ import type { EditorCommand, LoadCircuitCommand } from '../domain/commands.js';
 import type { ValidationResult } from '../domain/validation.js';
 import type { EditorPlugin } from '../plugins/types.js';
 import { PluginRegistry } from '../plugins/types.js';
+import type { PanZoomPluginAPI } from '../plugins/pan-zoom.plugin.js';
 import { createElement } from '../domain/circuit.js';
 import { createStore } from '../state/store.js';
 import { createAdapter } from '../parser-bridge/index.js';
 import { buildLayout, computeBounds } from '../layout/layout-engine.js';
-import { renderCircuit } from '../render-svg/renderer.js';
+import { buildCircuitLayers, collectInvalidElementIds } from '../render-svg/renderer.js';
+import { buildEditorSvgShell } from '../render-svg/infinite-grid.js';
+import { DEFAULT_THEME } from '../render-svg/symbols.js';
 import { defaultViewport } from '../domain/document.js';
 import { makeCommandId } from '../domain/commands.js';
 import { serialize } from '../parser-bridge/serializer.js';
 import { validate } from '../parser-bridge/validate.js';
+import type { StrictOptions } from '../parser-bridge/index.js';
+import type { CircuitGridRow } from '../domain/document.js';
 import {
   generateNextElementId,
   computeNextParamOffset,
@@ -28,6 +33,7 @@ import {
   addParallelToTarget,
   moveElementLeft,
   moveElementRight,
+  changeElementKind as changeElementKindInAst,
   getElementContext,
   type ParentContext,
 } from './commands-builder.js';
@@ -56,6 +62,10 @@ export interface EditorOptions {
   height?: number;
   onEvent?: EventHandler;
   plugins?: EditorPlugin[];
+  strict?: boolean;
+  blockInvalidSetValue?: boolean;
+  viewMode?: 'circuit' | 'grid';
+  initialGridRows?: CircuitGridRow[];
 }
 
 export type InsertMode = 'series' | 'parallel';
@@ -89,19 +99,28 @@ export interface EditorInstance {
   insertRelative(targetId: string, kind: ElementKind, position: 'before' | 'after' | 'parallel'): void;
   moveLeft(targetId: string): void;
   moveRight(targetId: string): void;
+  changeElementKind(targetId: string, kind: ElementKind): void;
   getContext(targetId: string): ParentContext;
   select(elementId: string): void;
   deselect(): void;
   getSelectedId(): string | null;
   getContainer(): HTMLElement | null;
+  getStrict(): boolean;
+  setStrict(strict: boolean): void;
+  getViewMode(): 'circuit' | 'grid';
+  setViewMode(mode: 'circuit' | 'grid'): void;
+  getGridRows(): CircuitGridRow[];
+  setGridRows(rows: CircuitGridRow[]): void;
+  fitView(): void;
+  resetView(): void;
 }
 
 const DEFAULT_WIDTH = 800;
 const DEFAULT_HEIGHT = 600;
 
-export function createEditor(editorOpts?: { plugins?: EditorPlugin[] }): EditorInstance {
+export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: StrictOptions }): EditorInstance {
   let container: HTMLElement | null = null;
-  const adapter = createAdapter();
+  const adapter = createAdapter(editorOpts?.strict);
   const store = createStore();
   const listeners = new Map<EditorEventType, Set<EventHandler>>();
   let insertMode: InsertMode = 'series';
@@ -139,33 +158,70 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[] }): EditorI
     const graph = rebuildGraph();
     const viewportWidth = doc.viewport.width > 0 ? doc.viewport.width : DEFAULT_WIDTH;
     const viewportHeight = doc.viewport.height > 0 ? doc.viewport.height : DEFAULT_HEIGHT;
+    const showParams = doc.metadata.showParams;
+    const validation = adapter.validate(getCurrentAst());
+    const invalidIds = collectInvalidElementIds(getCurrentAst());
 
-    // Use a neutral viewport — pan/zoom is handled entirely by the CSS
-    // transform in pan-zoom.plugin. We render in pure world coordinates.
-    const neutralViewport = { zoom: 1, panX: 0, panY: 0, width: viewportWidth, height: viewportHeight };
-
-    return renderCircuit(graph, neutralViewport, {
-      // Don't constrain SVG size — it should be as large as the content
-      // (overflow:visible on the SVG element handles clipping)
+    const layers = buildCircuitLayers(graph, {
       width: viewportWidth,
       height: viewportHeight,
-      showGrid: false,
+      showParams,
       selectedNodeIds: selection.selectedNodeIds,
+      invalidElementIds: validation.hasErrors ? invalidIds : undefined,
     });
+
+    return buildEditorSvgShell(viewportWidth, viewportHeight, DEFAULT_THEME)
+      .replace('<g id="connections"></g>', `<g id="connections">${layers.connections}</g>`)
+      .replace('<g id="nodes"></g>', `<g id="nodes">${layers.nodes}</g>`);
   }
 
   function syncContainer(): void {
     if (!container) return;
-    const svg = render();
-    // Render into .ce-canvas layer if plugins created one, otherwise into container
-    const target = (container.querySelector?.('.ce-canvas') as HTMLElement) || container;
-    if (typeof target.querySelectorAll === 'function') {
-      target.querySelectorAll('svg.circuit-editor').forEach(s => s.remove());
-      target.insertAdjacentHTML('beforeend', svg);
-    } else {
-      (target as any).innerHTML = svg;
+    const doc = store.getDocument();
+    if (doc.metadata.viewMode === 'grid') {
+      emit('render', '');
+      return;
     }
-    emit('render', svg);
+
+    const target = (container.querySelector?.('.ce-canvas') as HTMLElement) || container;
+    const viewportWidth = doc.viewport.width > 0 ? doc.viewport.width : DEFAULT_WIDTH;
+    const viewportHeight = doc.viewport.height > 0 ? doc.viewport.height : DEFAULT_HEIGHT;
+
+    if (typeof target.querySelector !== 'function') {
+      const html = render();
+      if (typeof target.insertAdjacentHTML === 'function') {
+        target.insertAdjacentHTML('beforeend', html);
+      } else {
+        (target as { innerHTML?: string }).innerHTML = html;
+      }
+      emit('render', html);
+      return;
+    }
+
+    let svg = target.querySelector('svg.circuit-editor-root') as SVGSVGElement | null;
+    if (!svg) {
+      target.insertAdjacentHTML('beforeend', buildEditorSvgShell(viewportWidth, viewportHeight, DEFAULT_THEME));
+      svg = target.querySelector('svg.circuit-editor-root') as SVGSVGElement;
+    }
+
+    const selection = store.getSelection();
+    const graph = rebuildGraph();
+    const showParams = doc.metadata.showParams;
+    const validation = adapter.validate(getCurrentAst());
+    const invalidIds = collectInvalidElementIds(getCurrentAst());
+
+    const layers = buildCircuitLayers(graph, {
+      showParams,
+      selectedNodeIds: selection.selectedNodeIds,
+      invalidElementIds: validation.hasErrors ? invalidIds : undefined,
+    });
+
+    const connectionsEl = svg?.querySelector('#connections');
+    const nodesEl = svg?.querySelector('#nodes');
+    if (connectionsEl) connectionsEl.innerHTML = layers.connections;
+    if (nodesEl) nodesEl.innerHTML = layers.nodes;
+
+    emit('render', svg?.outerHTML ?? '');
   }
 
   function handleStoreEvent(event: { type: string; payload: unknown }): void {
@@ -211,9 +267,41 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[] }): EditorI
         const result = adapter.parse(options.initialDsl);
         if ('error' in result) {
           emit('error', result.error);
-          return;
+          if (adapter.getOptions().blockInvalidSetValue) return;
+        } else {
+          loadAst(result.ast);
         }
-        loadAst(result.ast);
+      }
+
+      if (options?.strict !== undefined) {
+        store.dispatch({
+          id: makeCommandId(),
+          timestamp: Date.now(),
+          description: 'Set strict mode',
+          type: 'toggle-strict',
+          strict: options.strict,
+        });
+        adapter.setOptions({ strict: options.strict });
+      }
+
+      if (options?.viewMode) {
+        store.dispatch({
+          id: makeCommandId(),
+          timestamp: Date.now(),
+          description: 'Set view mode',
+          type: 'set-view-mode',
+          viewMode: options.viewMode,
+        });
+      }
+
+      if (options?.initialGridRows) {
+        store.dispatch({
+          id: makeCommandId(),
+          timestamp: Date.now(),
+          description: 'Set grid rows',
+          type: 'set-grid-rows',
+          rows: options.initialGridRows,
+        });
       }
 
       if (options?.width !== undefined || options?.height !== undefined) {
@@ -287,9 +375,9 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[] }): EditorI
       const result = adapter.parse(dsl);
       if ('error' in result) {
         emit('error', result.error);
-        return;
+        if (adapter.getOptions().blockInvalidSetValue) return;
       }
-      loadAst(result.ast);
+      if ('ast' in result) loadAst(result.ast);
     },
 
     getDocument(): CircuitDocument {
@@ -407,6 +495,13 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[] }): EditorI
       loadAst(newAst);
     },
 
+    changeElementKind(targetId: string, kind: ElementKind): void {
+      const { ast: newAst, newElementId } = changeElementKindInAst(getCurrentAst(), targetId, kind);
+      loadAst(newAst);
+      selectedElementId = newElementId;
+      emit('selection-changed', newElementId);
+    },
+
     getContext(targetId: string): ParentContext {
       return getElementContext(getCurrentAst(), targetId);
     },
@@ -427,6 +522,60 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[] }): EditorI
 
     getContainer(): HTMLElement | null {
       return container;
+    },
+
+    getStrict(): boolean {
+      return store.getDocument().metadata.strict;
+    },
+
+    setStrict(strict: boolean): void {
+      adapter.setOptions({ strict });
+      store.dispatch({
+        id: makeCommandId(),
+        timestamp: Date.now(),
+        description: `Strict mode ${strict ? 'on' : 'off'}`,
+        type: 'toggle-strict',
+        strict,
+      });
+      emit('validation', adapter.validate(getCurrentAst()));
+    },
+
+    getViewMode(): 'circuit' | 'grid' {
+      return store.getDocument().metadata.viewMode;
+    },
+
+    setViewMode(mode: 'circuit' | 'grid'): void {
+      store.dispatch({
+        id: makeCommandId(),
+        timestamp: Date.now(),
+        description: `View mode ${mode}`,
+        type: 'set-view-mode',
+        viewMode: mode,
+      });
+      pluginRegistry.emit('view-mode-changed', mode);
+      syncContainer();
+    },
+
+    getGridRows(): CircuitGridRow[] {
+      return store.getDocument().gridRows ?? [];
+    },
+
+    setGridRows(rows: CircuitGridRow[]): void {
+      store.dispatch({
+        id: makeCommandId(),
+        timestamp: Date.now(),
+        description: 'Update grid rows',
+        type: 'set-grid-rows',
+        rows,
+      });
+    },
+
+    fitView(): void {
+      pluginRegistry.getPlugin<PanZoomPluginAPI>('pan-zoom')?.fitView();
+    },
+
+    resetView(): void {
+      pluginRegistry.getPlugin<PanZoomPluginAPI>('pan-zoom')?.resetView();
     },
   };
 

@@ -47,10 +47,10 @@ export function buildPropertiesPanelHTML(node: CircuitNode | null, config?: Prop
 
     if (def?.params) {
       for (let i = 0; i < def.params.length; i++) {
-        const paramName = def.params[i];
+        const paramDef = def.params[i];
         body += `<div class="ce-props-row">
-          <label class="ce-props-label">${paramName}</label>
-          <input class="ce-props-input" type="number" data-param-index="${i}" value="1.0" step="any" />
+          <label class="ce-props-label" title="${paramDef.title}">${paramDef.short}</label>
+          <input class="ce-props-input" type="number" data-param-index="${i}" value="1.0" step="any" title="${paramDef.title}" />
         </div>`;
       }
     }
