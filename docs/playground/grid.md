@@ -9,6 +9,8 @@ pageClass: full-width-page
 
 Virtualized SVG table: each row shows the **linear DSL** (with `{…}` parameters), a **circuit preview**, and parameter summary.
 
+<SymbolGallery />
+
 <GridPlayground />
 
 ## Related
