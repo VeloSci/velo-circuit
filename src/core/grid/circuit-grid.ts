@@ -1,4 +1,5 @@
 import type { CircuitGridRow } from '../domain/document.js';
+import type { CircuitNode } from '../domain/circuit.js';
 import { parseBoukamp } from '../parser-bridge/parser.js';
 import { validate } from '../parser-bridge/validate.js';
 import { ElementRegistry } from '../parser-bridge/element-registry.js';
@@ -59,6 +60,10 @@ const DEFAULT_COLUMNS: GridColumnDef[] = [
 const HEADER_HEIGHT = 32;
 const CELL_PAD = 10;
 
+function isParseFailure(result: ReturnType<typeof parseBoukamp>): result is Exclude<ReturnType<typeof parseBoukamp>, CircuitNode> {
+  return result.type === 'lex' || result.type === 'parse';
+}
+
 function columnWidth(columns: GridColumnDef[], idx: number, overrides?: number[]): number {
   if (overrides?.[idx] !== undefined) return overrides[idx];
   return columns[idx].width ?? 160;
@@ -88,7 +93,7 @@ interface RowStatus {
 
 function rowStatus(dsl: string, strict: boolean): RowStatus {
   const ast = parseBoukamp(dsl);
-  if ('type' in ast) {
+  if (isParseFailure(ast)) {
     return { parseError: true, hasError: true, hasWarning: false };
   }
   const result = validate(ast, { strict });
@@ -107,7 +112,7 @@ function formatParamValue(v: number): string {
 
 function paramsSummary(dsl: string): { text: string; title: string } {
   const ast = parseBoukamp(dsl);
-  if ('type' in ast) return { text: '—', title: 'Invalid DSL' };
+  if (isParseFailure(ast)) return { text: '—', title: 'Invalid DSL' };
   const registry = ElementRegistry.fromCircuit(ast);
   const names = registry.paramNames();
   const vals = registry.flatParamVector(ast);
@@ -241,7 +246,7 @@ export function createCircuitGrid(options: CircuitGridOptions): CircuitGridInsta
       switch (col.type) {
         case 'dsl':
           content = `<foreignObject x="${x + CELL_PAD}" y="${y + 8}" width="${w - CELL_PAD * 2}" height="${rowHeight - 16}">
-            <motion xmlns="http://www.w3.org/1999/xhtml" style="font:11px var(--ce-font-mono);color:var(--ce-text);line-height:1.45;word-break:break-all;">${escapeXml(row.dsl)}</motion>
+            <div xmlns="http://www.w3.org/1999/xhtml" style="font:11px var(--ce-font-mono);color:var(--ce-text);line-height:1.45;word-break:break-all;">${escapeXml(row.dsl)}</div>
           </foreignObject>`;
           break;
         case 'svg':
