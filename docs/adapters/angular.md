@@ -1,11 +1,36 @@
 # Angular
 
+> **Package:** `velo-circuit` · **Core:** `velo-circuit` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+
+## Static SVG in Angular
+
+```ts
+import { Component, Input } from '@angular/core'
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+@Component({
+  selector: 'circuit-diagram',
+  template: `<div [innerHTML]="svg"></div>`,
+})
+export class CircuitDiagramComponent {
+  @Input() dsl = 'R0-p(R1,C1)'
+  svg: SafeHtml
+
+  constructor(sanitizer: DomSanitizer) {
+    this.svg = sanitizer.bypassSecurityTrustHtml(
+      renderDslPreviewSvg(this.dsl, { themeMode: 'dark', colorMode: 'multicolor' }),
+    )
+  }
+}
+```
+
 ## Installation
 
 ```bash
-npm install velo-circuit-editor
+npm install velo-circuit
 # or
-pnpm add velo-circuit-editor
+pnpm add velo-circuit
 ```
 
 ## Module Setup
@@ -31,7 +56,7 @@ export class CircuitEditorModule {}
 ```ts
 // circuit-editor.component.ts
 import { Component, Input, Output, EventEmitter, AfterViewInit, OnDestroy } from '@angular/core'
-import { createEditor, type EditorInstance } from 'velo-circuit-editor'
+import { createEditor, type EditorInstance } from 'velo-circuit'
 
 @Component({
   selector: 'circuit-editor',

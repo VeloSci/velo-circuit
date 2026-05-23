@@ -1,11 +1,25 @@
 # Svelte
 
+> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/svelte` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+
+## Static SVG in Svelte
+
+```svelte
+<script lang="ts">
+  import { renderDslPreviewSvg } from 'velo-circuit'
+  export let dsl = 'R0-p(R1,C1)'
+  $: svg = renderDslPreviewSvg(dsl, { themeMode: 'dark', colorMode: 'multicolor' })
+</script>
+
+{@html svg}
+```
+
 ## Component
 
 ```svelte
 <script>
   import { onMount, onDestroy } from 'svelte'
-  import { createSvelteCircuitEditor } from 'velo-circuit-editor/adapters/svelte'
+  import { createSvelteCircuitEditor } from 'velo-circuit/svelte'
 
   export let initialDsl = 'R0-p(R1,C1)'
   export let width = 800
@@ -35,7 +49,7 @@
 ```svelte
 <script>
   import { onMount } from 'svelte'
-  import { createSvelteCircuitEditor } from 'velo-circuit-editor/adapters/svelte'
+  import { createSvelteCircuitEditor } from 'velo-circuit/svelte'
 
   let dsl = 'R0-p(R1,C1)-Wo2'
   let errors: string[] = []
@@ -69,7 +83,7 @@
   export let dsl = 'R0-C1'
 
   import { onMount } from 'svelte'
-  import { createSvelteCircuitEditor } from 'velo-circuit-editor/adapters/svelte'
+  import { createSvelteCircuitEditor } from 'velo-circuit/svelte'
 
   let container: HTMLDivElement
 
@@ -104,7 +118,7 @@ This is a complete, copy-pasteable implementation of an interactive playground u
 
 ```svelte
 <script lang="ts">
-  import { circuitEditor } from 'velo-circuit-editor/adapters/svelte';
+  import { circuitEditor } from 'velo-circuit/svelte';
   
   let dsl = 'R0-p(R1,C1)';
   let editorNode: HTMLElement;

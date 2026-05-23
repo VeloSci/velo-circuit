@@ -1,12 +1,14 @@
 # Vanilla JS
 
+> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/vanilla` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+
 The vanilla adapter is the reference implementation. No framework needed.
 
 ## Installation
 
 ```html
 <script type="module">
-  import { mountCircuitEditor } from './dist/velo-circuit-editor.es.js'
+  import { mountCircuitEditor } from 'velo-circuit/vanilla'
 </script>
 ```
 
@@ -25,7 +27,7 @@ Or from source:
 <div id="dsl-output"></div>
 
 <script type="module">
-  import { createEditor } from 'velo-circuit-editor'
+  import { createEditor } from 'velo-circuit'
 
   const editor = createEditor()
   editor.mount(document.getElementById('editor'), {
@@ -65,6 +67,22 @@ document.querySelectorAll('[data-kind]').forEach(btn => {
     editor.setValue(`${dsl}-${kind}0`)
   })
 })
+```
+
+## Static SVG preview
+
+No adapter required — use the core render API:
+
+```js
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+const svg = renderDslPreviewSvg('R0-p(R1,C1)', {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+})
+
+document.getElementById('diagram').innerHTML = svg
 ```
 
 ## Export

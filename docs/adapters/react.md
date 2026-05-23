@@ -1,30 +1,29 @@
 # React
 
+> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/react` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+
+## Static SVG in React
+
+```tsx
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+function CircuitDiagram({ dsl }: { dsl: string }) {
+  const svg = renderDslPreviewSvg(dsl, {
+    themeMode: 'dark',
+    colorMode: 'multicolor',
+    connectionStyle: 'curved',
+  })
+  return <div dangerouslySetInnerHTML={{ __html: svg }} />
+}
+```
+
 ## useCircuitEditor Hook
 
 ```tsx
-import { useCircuitEditor } from 'velo-circuit-editor/adapters/react'
+import { useCircuitEditor } from 'velo-circuit/react'
 
 function CircuitEditor({ initialDsl = 'R0-p(R1,C1)' }: { initialDsl?: string }) {
-  const containerRef = { current: null } as React.RefObject<HTMLDivElement>
-  const editorRef = { current: null } as { current: EditorInstance | null }
-
-  useEffect(() => {
-    if (!containerRef.current || editorRef.current) return
-
-    const { createEditor } = require('velo-circuit-editor')
-    const editor = createEditor()
-    editor.mount(containerRef.current, { initialDsl })
-
-    editor.on('ast-changed', () => {
-      // trigger re-render
-    })
-
-    editorRef.current = editor
-
-    return () => editor.destroy()
-  }, [])
-
+  const { containerRef } = useCircuitEditor({ initialDsl })
   return <div ref={containerRef} style={{ width: 800, height: 600 }} />
 }
 ```
@@ -33,24 +32,18 @@ function CircuitEditor({ initialDsl = 'R0-p(R1,C1)' }: { initialDsl?: string }) 
 
 ```tsx
 import { useState } from 'react'
+import { useRef, useEffect } from 'react'
+import { createReactCircuitEditor } from 'velo-circuit/react'
 
-function ControlledEditor({ value, onChange }) {
-  const containerRef = useRef(null)
-  const editorRef = useRef(null)
+function ControlledEditor({ value, onChange }: { value: string; onChange: (dsl: string) => void }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const editorRef = useRef<ReturnType<typeof createReactCircuitEditor> | null>(null)
 
   useEffect(() => {
     if (!containerRef.current) return
 
-    const { createEditor } = require('velo-circuit-editor')
-    const editor = createEditor()
-    editor.mount(containerRef.current, { initialDsl: value })
-
-    editor.on('ast-changed', () => {
-      onChange(editor.getValue())
-    })
-
+    const editor = createReactCircuitEditor(containerRef.current, { initialDsl: value, onChange })
     editorRef.current = editor
-
     return () => editor.destroy()
   }, [])
 
@@ -64,50 +57,13 @@ function ControlledEditor({ value, onChange }) {
 }
 ```
 
-## Controlled + Uncontrolled
-
-```tsx
-function CircuitEditor({
-  defaultValue = 'R0-p(R1,C1)',
-  value,
-  onChange,
-}: {
-  defaultValue?: string
-  value?: string
-  onChange?: (dsl: string) => void
-}) {
-  // controlled if value is provided, uncontrolled otherwise
-  const [internalValue, setInternalValue] = useState(defaultValue)
-  const dsl = value ?? internalValue
-
-  return (
-    <div ref={useRef(null)} onMount={(el) => {
-      const { createEditor } = require('velo-circuit-editor')
-      const editor = createEditor()
-      editor.mount(el, { initialDsl: dsl })
-      editor.on('ast-changed', () => {
-        const next = editor.getValue()
-        setInternalValue(next)
-        onChange?.(next)
-      })
-    }} />
-  )
-}
-```
-
-## Props
-
-| `onEvent` | `(e: EditorEvent) => void` | Global event handler |
-
----
-
 ## Complete Playground Example
 
 This is a complete, copy-pasteable implementation of an interactive playground using the `useCircuitEditor` hook. It mirrors the vanilla playground exactly!
 
 ```tsx
 import React, { useState } from 'react';
-import { useCircuitEditor } from 'velo-circuit-editor/adapters/react';
+import { useCircuitEditor } from 'velo-circuit/react';
 
 export default function CircuitPlayground() {
   const [dsl, setDsl] = useState('R0-p(R1,C1)');

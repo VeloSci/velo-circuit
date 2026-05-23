@@ -2,12 +2,30 @@
 
 Astro islands require client-side hydration. The circuit editor is mounted only in the browser.
 
+> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/astro` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+
+## Static SVG in Astro
+
+For build-time or server-rendered diagrams (no client JS):
+
+```astro
+---
+import { renderDslPreviewSvg } from 'velo-circuit'
+const svg = renderDslPreviewSvg('R0-p(R1,C1)-Wo2', {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+})
+---
+<div set:html={svg} />
+```
+
 ## Installation
 
 ```bash
-npm install velo-circuit-editor
+npm install velo-circuit
 # or
-pnpm add velo-circuit-editor
+pnpm add velo-circuit
 ```
 
 ## Basic Astro Component
@@ -20,7 +38,7 @@ pnpm add velo-circuit-editor
 <div id="circuit-editor" style="width: 800px; height: 600px;"></div>
 
 <script>
-  import { mountAstroCircuitEditor } from 'velo-circuit-editor/adapters/astro'
+  import { mountAstroCircuitEditor } from 'velo-circuit/astro'
 
   const container = document.getElementById('circuit-editor')
   if (container) {
@@ -57,7 +75,7 @@ Mounts an editor to a container element:
 
 ```astro
 <script>
-  import { mountAstroCircuitEditor } from 'velo-circuit-editor/adapters/astro'
+  import { mountAstroCircuitEditor } from 'velo-circuit/astro'
 
   const container = document.getElementById('editor')
   if (container) {
@@ -82,7 +100,7 @@ Retrieve a previously mounted editor by ID:
 
 ```astro
 <script>
-  import { getAstroCircuitEditor } from 'velo-circuit-editor/adapters/astro'
+  import { getAstroCircuitEditor } from 'velo-circuit/astro'
 
   // Get editor mounted with id 'main-editor'
   const editor = getAstroCircuitEditor('main-editor')
@@ -98,7 +116,7 @@ Clean up an editor instance:
 
 ```astro
 <script>
-  import { unmountAstroCircuitEditor } from 'velo-circuit-editor/adapters/astro'
+  import { unmountAstroCircuitEditor } from 'velo-circuit/astro'
 
   // Later, when navigating away or cleaning up
   unmountAstroCircuitEditor('main-editor')
@@ -140,7 +158,7 @@ Full-featured circuit playground with a custom toolbar for all **11** palette ki
 </div>
 
 <script>
-  import { mountAstroCircuitEditor, getAstroCircuitEditor } from 'velo-circuit-editor/adapters/astro'
+  import { mountAstroCircuitEditor, getAstroCircuitEditor } from 'velo-circuit/astro'
 
   const container = document.getElementById('circuit-editor')!
   const dslDisplay = document.getElementById('dsl-display')!
@@ -229,7 +247,7 @@ Managing several circuit editors on one page:
 
 ```astro
 <script>
-  import { mountAstroCircuitEditor } from 'velo-circuit-editor/adapters/astro'
+  import { mountAstroCircuitEditor } from 'velo-circuit/astro'
 
   const editors = new Map()
 

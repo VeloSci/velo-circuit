@@ -1,5 +1,27 @@
 # Vue 3
 
+> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/vue` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+
+## Static SVG in Vue
+
+```vue
+<script setup lang="ts">
+import { computed } from 'vue'
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+const props = defineProps<{ dsl: string }>()
+const svg = computed(() => renderDslPreviewSvg(props.dsl, {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+}))
+</script>
+
+<template>
+  <div v-html="svg" />
+</template>
+```
+
 ## Basic Usage
 
 ```vue
@@ -13,16 +35,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { createEditor } from 'velo-circuit-editor/adapters/vue'
+import { createVueCircuitEditor, type VueEditorInstance } from 'velo-circuit/vue'
 
 const editorContainer = ref<HTMLDivElement | null>(null)
 const dsl = ref('R0-p(R1,C1)-Wo2')
-let editor: EditorInstance | null = null
+let editor: VueEditorInstance | null = null
 
 onMounted(() => {
   if (!editorContainer.value) return
 
-  const { createVueCircuitEditor } = require('velo-circuit-editor/adapters/vue')
   editor = createVueCircuitEditor(editorContainer.value, {
     initialDsl: dsl.value,
     onDslChange: (newDsl: string) => { dsl.value = newDsl },
@@ -51,7 +72,7 @@ const circuitDsl = ref('R0-C1')
 ## Mount by ID
 
 ```js
-import { mountVueCircuitEditor } from 'velo-circuit-editor/adapters/vue'
+import { mountVueCircuitEditor } from 'velo-circuit/vue'
 
 const editor = mountVueCircuitEditor('editor-container', {
   initialDsl: 'R0-p(R1,C1)-Wo2',
@@ -104,7 +125,7 @@ This is a complete, copy-pasteable implementation of an interactive playground u
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useCircuitEditor } from 'velo-circuit-editor/adapters/vue';
+import { useCircuitEditor } from 'velo-circuit/vue';
 
 const dsl = ref('R0-p(R1,C1)');
 
