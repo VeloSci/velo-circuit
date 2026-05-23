@@ -25,41 +25,53 @@ editor.mount(document.getElementById('canvas'), {
   height: 600,
 })
 
-// React to circuit changes
 editor.on('ast-changed', () => {
   const dsl = editor.getValue()
   console.log(dsl) // e.g. "R0-p(R1,C1)-Wo2"
 })
 
-// Listen for errors
 editor.on('error', (e) => {
   console.error('Parse error:', e.payload)
 })
 
-// Update circuit programmatically
 editor.setValue('R0-C1-L2')
-
-// Undo / redo
 editor.undo()
 editor.redo()
-
-// Cleanup
 editor.destroy()
 ```
 
 ## What is a Circuit DSL?
 
-Circuits are described with the Boukamp notation, used in electrochemical impedance spectroscopy (EIS).
+Circuits are described with Boukamp notation used in electrochemical impedance spectroscopy (EIS).
 
-| Symbol | Meaning | Example |
-|--------|---------|---------|
-| `-` | Series connection | `R0-C1` |
-| `p(a,b)` | Parallel connection | `p(R0,C1)` |
-| `R` | Resistor | `R0` |
-| `C` | Capacitor | `C1` |
-| `L` | Inductor | `L2` |
-| `Q` | CPE | `Q0` |
-| `W`, `Ws`, `Wo` | Warburg | `Wo3` |
+| Operator / code | Meaning | Example |
+|-----------------|---------|---------|
+| `-` | Series | `R0-C1` |
+| `p(a,b)` | Parallel | `p(R0,C1)` |
+| `R`, `C`, `L` | Passives | `R0`, `C1`, `L2` |
+| `Q` | CPE | `Q0{5e-5,0.8}` |
+| `W`, `Ws`, `Wo` | Warburg variants | `W2`, `Ws1`, `Wo3` |
+| `G` | Gerischer | `G0{1e-3,0.1}` |
+| `Pdw` | Parallel Diffusion Warburg | `Pdw0` |
+| `CC`, `HN` | Dispersion | `CC1{50,1e-3,0.8}` |
+
+### All eleven element kinds
+
+| Code | Label | Params |
+|------|-------|--------|
+| `R` | Resistor | R |
+| `C` | Capacitor | C |
+| `L` | Inductor | L |
+| `Q` | CPE | Q₀, n |
+| `W` | Warburg (infinite) | σ |
+| `Ws` | Warburg (short) | Y₀, B |
+| `Wo` | Warburg (open) | Y₀, B |
+| `G` | Gerischer | Y₀, K |
+| `Pdw` | Parallel Diffusion Warburg | D1, D2, θ, Λ |
+| `CC` | Cole-Cole | R, τ, α |
+| `HN` | Havriliak-Negami | R, τ, α, β |
+
+See [Element Types](/reference/element-types) for units, ranges, and symbols.
 
 ## Next Steps
 
