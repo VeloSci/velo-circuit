@@ -117,6 +117,39 @@ Pdw0      → [Pdw0]
 - **Units:** D1 (cm²/s), D2 (cm²/s), theta (dimensionless), Lambda (mol/cm³)
 - **DSL code:** `Pdw`
 
+## Cole-Cole (`CC`)
+
+Dispersion relaxation element. Matches `velo-spectroz-circuits` Cole-Cole impedance.
+
+```
+CC1{50,1e-3,0.8}
+```
+
+- **Parameters:** 3 — R (Ω), τ (s), α
+- **DSL code:** `CC`
+- **Range:** R,τ > 0; 0.3 ≤ α ≤ 1.0
+
+## Havriliak-Negami (`HN`)
+
+Generalized dispersion with dual exponents.
+
+```
+HN1{50,1e-3,0.8,0.9}
+```
+
+- **Parameters:** 4 — R (Ω), τ (s), α, β
+- **DSL code:** `HN`
+- **Range:** R,τ > 0; 0.3 ≤ α ≤ 1.0; 0 ≤ β ≤ 1.0
+
+## Parameter embedding
+
+Parameters can be embedded in the linear DSL using braces (canonical) or brackets (alias):
+
+```
+R0{50}-Q1{5e-5,0.8}
+R0[50]              # alias
+```
+
 ## ELEMENT_KINDS Table
 
 | Code | Label | Parameters |
@@ -130,3 +163,5 @@ Pdw0      → [Pdw0]
 | `Wo` | Warburg Open | 2 |
 | `G` | Gerischer | 2 |
 | `Pdw` | Parallel Diffusion Warburg | 4 |
+| `CC` | Cole-Cole | 3 |
+| `HN` | Havriliak-Negami | 4 |
