@@ -1,7 +1,7 @@
 import type { EditableGraph, ElementNode, Connection } from '../domain/graph.js';
 import type { CircuitDocument, ViewportState } from '../domain/document.js';
 import type { RenderTheme } from './symbols.js';
-import { buildSvgElementSymbol, buildParallelSymbol, buildSeriesSymbol, buildJunctionDot, DEFAULT_THEME } from './symbols.js';
+import { buildSvgElementSymbol, buildParallelSymbol, buildSeriesSymbol, DEFAULT_THEME } from './symbols.js';
 import { getTheme, buildThemeCSS, type ThemeMode } from './themes.js';
 
 export interface InteractionOverlay {
@@ -88,6 +88,8 @@ function buildNodeElement(
   }
 
   const label = circuit.type === 'element' ? `${circuit.kind}${circuit.id}` : '';
+  const elementIdAttr = label ? ` data-element-id="${label}"` : '';
+  const kindAttr = circuit.type === 'element' ? ` data-kind="${circuit.kind}"` : '';
   const selectionColor = isSelected ? colors.highlight : 'transparent';
   const selStrokeWidth = isSelected ? strokeWidth * 2 : 0;
 
@@ -108,8 +110,8 @@ function buildNodeElement(
   }
 
   return `
-    <g id="node-${node.nodeId}" class="circuit-node${isSelected ? ' selected' : ''}${isFocused ? ' focused' : ''}" data-node-id="${node.nodeId}" transform="translate(${x}, ${y})">
-      <rect class="node-bg" x="-2" y="-2" width="${w + 4}" height="${h + 4}" fill="none" stroke="${selectionColor}" stroke-width="${selStrokeWidth}" rx="6"/>
+    <g id="node-${node.nodeId}" class="circuit-node${isSelected ? ' selected' : ''}${isFocused ? ' focused' : ''}" data-node-id="${node.nodeId}"${elementIdAttr}${kindAttr} transform="translate(${x}, ${y})">
+      <rect class="node-bg" x="-2" y="-2" width="${w + 4}" height="${h + 4}" fill="none" stroke="${selectionColor}" stroke-width="${selStrokeWidth}" rx="6" vector-effect="non-scaling-stroke"/>
       <svg class="node-symbol" width="${w}" height="${h}" viewBox="0 0 ${theme.elementWidth} ${theme.elementHeight}">
         ${innerSvg}
       </svg>
@@ -140,7 +142,7 @@ function buildConnectionElement(conn: Connection, graph: EditableGraph, theme: R
   // Port positions are in world coordinates — use directly
   const path = buildConnectionPath({ x: fromPort.x, y: fromPort.y }, { x: toPort.x, y: toPort.y });
 
-  return `<path class="circuit-connection" d="${path}" stroke="${theme.colors.stroke}" stroke-width="${theme.strokeWidth}" fill="none" data-from="${conn.fromNodeId}" data-to="${conn.toNodeId}"/>`;
+  return `<path class="circuit-connection" d="${path}" stroke="var(--ce-stroke, ${theme.colors.stroke})" stroke-width="${theme.strokeWidth}" fill="none" vector-effect="non-scaling-stroke" data-from="${conn.fromNodeId}" data-to="${conn.toNodeId}"/>`;
 }
 
 function buildOverlayElement(overlay: InteractionOverlay, theme: RenderTheme): string {

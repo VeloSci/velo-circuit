@@ -83,6 +83,7 @@ function buildNodeElement(
   const selectionStroke = isInvalid ? theme.colors.error : (isSelected ? theme.colors.highlight : 'transparent');
   const selectionWidth = (isSelected || isInvalid) ? theme.strokeWidth * 2 : 0;
   const elementIdAttr = label ? ` data-element-id="${label}"` : '';
+  const kindAttr = circuit.type === 'element' ? ` data-kind="${circuit.kind}"` : '';
   const errorClass = isInvalid ? ' node-error' : '';
 
   let paramLabel = '';
@@ -94,7 +95,7 @@ function buildNodeElement(
   const labelY = h + 14;
 
   return `
-    <g id="${node.nodeId}" transform="translate(${x}, ${y})" class="circuit-node${errorClass}" data-node-id="${node.nodeId}"${elementIdAttr}>
+    <g id="${node.nodeId}" transform="translate(${x}, ${y})" class="circuit-node${errorClass}" data-node-id="${node.nodeId}"${elementIdAttr}${kindAttr}>
       <rect class="node-hit" x="-4" y="-4" width="${w + 8}" height="${h + 22}" fill="transparent" />
       <rect class="node-bg" x="-2" y="-2" width="${w + 4}" height="${h + 4}"
         fill="none" stroke="${selectionStroke}" stroke-width="${selectionWidth}"
@@ -117,7 +118,7 @@ function buildConnectionElement(conn: Connection, graph: EditableGraph, theme: R
   if (!fromPort || !toPort) return '';
 
   const path = buildConnectionPath({ x: fromPort.x, y: fromPort.y }, { x: toPort.x, y: toPort.y });
-  return `<path d="${path}" stroke="${theme.colors.stroke}" stroke-width="${theme.strokeWidth}" fill="none" class="circuit-connection" vector-effect="non-scaling-stroke" data-from="${conn.fromNodeId}" data-to="${conn.toNodeId}" />`;
+  return `<path d="${path}" stroke="var(--ce-stroke, ${theme.colors.stroke})" stroke-width="${theme.strokeWidth}" fill="none" class="circuit-connection" vector-effect="non-scaling-stroke" data-from="${conn.fromNodeId}" data-to="${conn.toNodeId}" />`;
 }
 
 export function buildCircuitLayers(
@@ -162,11 +163,11 @@ export function renderCircuit(
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"${viewBoxAttr} class="circuit-editor" overflow="visible">
   <style>
     .circuit-node { cursor: pointer; }
-    .circuit-node:hover .node-bg { stroke: ${theme.colors.highlight}; stroke-width: 2; }
+    .circuit-node:hover .node-bg { stroke: ${theme.colors.highlight}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
     .circuit-connection { transition: stroke 0.15s; }
-    .circuit-connection:hover { stroke: ${theme.colors.highlight}; stroke-width: 2; }
+    .circuit-connection:hover { stroke: ${theme.colors.highlight}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
     .circuit-junction { pointer-events: none; }
-    .node-error .node-bg { stroke: ${theme.colors.error}; stroke-width: 2; }
+    .node-error .node-bg { stroke: ${theme.colors.error}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
   </style>
   <g id="viewport">
     <g id="content-layer">

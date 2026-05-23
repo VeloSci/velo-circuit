@@ -62,11 +62,11 @@ export function buildEditorSvgShell(
 <svg xmlns="http://www.w3.org/2000/svg" width="${viewportWidth}" height="${viewportHeight}" class="circuit-editor-root" overflow="hidden">
   <style>
     .circuit-node { cursor: pointer; }
-    .circuit-node:hover .node-bg { stroke: ${theme.colors.highlight}; stroke-width: 2; }
+    .circuit-node:hover .node-bg { stroke: ${theme.colors.highlight}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
     .circuit-connection { transition: stroke 0.15s; }
-    .circuit-connection:hover { stroke: ${theme.colors.highlight}; stroke-width: 2; }
+    .circuit-connection:hover { stroke: ${theme.colors.highlight}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
     .circuit-junction { pointer-events: none; }
-    .node-error .node-bg { stroke: ${theme.colors.error}; stroke-width: 2; }
+    .node-error .node-bg { stroke: ${theme.colors.error}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
     .param-edit-input { font: 10px monospace; border: 1px solid ${theme.colors.highlight}; border-radius: 2px; padding: 1px 3px; width: 100%; box-sizing: border-box; background: ${theme.colors.fill}; color: ${theme.colors.text}; }
     .param-edit-input.invalid { border-color: ${theme.colors.error}; }
   </style>

@@ -1,16 +1,17 @@
 import type { RenderTheme, ThemeColors } from './symbols.js';
+import { SYMBOL_STROKE_WIDTH } from './symbols.js';
 
 export const DARK_THEME: RenderTheme = {
   colors: {
     stroke: '#f8fafc',
-    fill: '#0f172a', // Deeper background for better contrast
+    fill: '#0f172a',
     text: '#f1f5f9',
     highlight: '#38bdf8',
     error: '#f87171',
     warning: '#fbbf24',
     grid: '#1e293b',
   },
-  strokeWidth: 2.0,
+  strokeWidth: SYMBOL_STROKE_WIDTH,
   fontSize: 12,
   fontFamily: 'monospace',
   elementWidth: 80,
@@ -30,7 +31,7 @@ export const THEMES: Record<ThemeMode, RenderTheme> = {
       warning: '#f59e0b',
       grid: '#94a3b8', // Much darker grid color for light mode
     },
-    strokeWidth: 1.5,
+    strokeWidth: SYMBOL_STROKE_WIDTH,
     fontSize: 12,
     fontFamily: 'monospace',
     elementWidth: 80,
@@ -82,5 +83,7 @@ export function buildThemeCSS(theme: RenderTheme): string {
     .circuit-node[data-kind="W"], .circuit-node[data-kind="Ws"], .circuit-node[data-kind="Wo"] { --ce-W-stroke: #a78bfa; --ce-Ws-stroke: #a78bfa; --ce-Wo-stroke: #a78bfa; }
     .circuit-node[data-kind="G"] { --ce-G-stroke: #22d3ee; }
     .circuit-node[data-kind="Pdw"] { --ce-Pdw-stroke: #c084fc; }
+    .circuit-node[data-kind="CC"] { --ce-CC-stroke: #fb923c; }
+    .circuit-node[data-kind="HN"] { --ce-HN-stroke: #f472b6; }
   `.trim();
 }
