@@ -44,6 +44,19 @@ describe('editor', () => {
     const dsl = editor.getValue();
     expect(dsl).toBe('R0-C1-L2');
   });
+
+  it('changeElementKind avoids duplicate ids and restores remembered kind id', () => {
+    const editor = createEditor();
+    editor.setValue('R0-p(R1,C1)-Wo2');
+    editor.changeElementKind('R1', 'C' as import('../src/core/domain/circuit.js').ElementKind);
+    expect(editor.getValue()).toContain('C2');
+    expect(editor.getSelectedId()).toBe('C2');
+    editor.changeElementKind('C2', 'R' as import('../src/core/domain/circuit.js').ElementKind);
+    expect(editor.getValue()).toMatch(/R1[^0-9]|^R0-p\(R1,/);
+    expect(editor.getSelectedId()).toBe('R1');
+    const validation = editor.getValidation();
+    expect(validation.hasErrors).toBe(false);
+  });
 });
 
 describe('Standalone SVG API', () => {
