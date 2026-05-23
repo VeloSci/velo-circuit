@@ -36,7 +36,7 @@ The editor enables users to build Boukamp circuits visually and textually, keepi
 ## Functional Requirements
 
 - Create, select, move, duplicate, and delete nodes and branches.
-- Insert elements `R`, `C`, `L`, `Q`, `W`, `Ws`, `Wo`.
+- Insert all **11** element kinds: `R`, `C`, `L`, `Q`, `W`, `Ws`, `Wo`, `G`, `Pdw`, `CC`, `HN` (**11/11** supported).
 - Convert structures between series and parallel with guided actions.
 - Sync DSL text <-> AST <-> visual scene.
 - Undo and redo operations.

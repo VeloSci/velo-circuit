@@ -13,7 +13,7 @@ Build a pure, efficient, and easy-to-theme SVG rendering layer without canvas or
 - `defs` for arrow markers. ✅
 
 **Files:**
-- `src/core/render-svg/symbols.ts` — SVG symbols for R, C, L, Q, W, Ws, Wo; `DEFAULT_THEME`
+- `src/core/render-svg/symbols.ts` — SVG symbols for all 11 kinds; `DEFAULT_THEME`
 - `src/core/render-svg/renderer.ts` — `renderCircuit()`, `renderCircuitToElement()`, `extractSvgString()`
 - `src/core/render-svg/renderer-ex.ts` — `renderCircuitEx()`, `renderDocument()`, `extractSvgSnapshot()`, `exportSvgWithStyles()`
 - `src/core/render-svg/themes.ts` — `DARK_THEME`, `light`/`dark` themes, `buildThemeCSS()`, `getTheme()`, `toggleTheme()`
@@ -30,11 +30,23 @@ Build a pure, efficient, and easy-to-theme SVG rendering layer without canvas or
 
 ## Symbol System ✅
 
-- `R`: resistive symbol. ✅
-- `C`: capacitive plates. ✅
-- `L`: coils. ✅
-- `Q`: CPE symbol. ✅
-- `W`, `Ws`, `Wo`: Warburg variants. ✅
+All symbols follow the [outline symbol design system](../docs/reference/symbol-design-system.md): 80×40 viewBox, terminals at y=20, **2.0 px** base stroke (`theme.strokeWidth`), outline-only paths, per-kind `--ce-{kind}-stroke` colors.
+
+| Kind | Role |
+|------|------|
+| `R` | Resistor (zigzag) |
+| `C` | Capacitor (plates, 1.25× stroke) |
+| `L` | Inductor (coil) |
+| `Q` | CPE (angled plate + **n**) |
+| `W` | Warburg infinite (open diffusion diagonal) |
+| `Ws` | Warburg short (closing bar) |
+| `Wo` | Warburg open (reflecting boundary) |
+| `G` | Gerischer (diffusion + reaction hook) |
+| `Pdw` | Parallel diffusion Warburg (forked diagonals) |
+| `CC` | Cole-Cole (arc + **α**) |
+| `HN` | Havriliak-Negami (dual arc + **α**, **β**) |
+
+**Stroke rules:** leads/bars/coils 1.0×; capacitor/CPE plates 1.25×; Warburg/PDW diagonals 1.15×; connections use `theme.strokeWidth` with `vector-effect: non-scaling-stroke`. See [symbol-design-system.md](../docs/reference/symbol-design-system.md).
 
 ## Theming ✅
 

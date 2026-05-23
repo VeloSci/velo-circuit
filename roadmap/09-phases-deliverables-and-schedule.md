@@ -88,7 +88,7 @@ Deliver an SVG circuit editor in TypeScript, with no external dependencies, fram
 
 **Deliverable:** stable release candidate.
 
-- **45/45 tests passing**
+- **195/195 tests passing**
 - Layout tests, parser tests, editor tests, integration tests ✅
 - TypeScript strict mode, no external runtime dependencies ✅
 
@@ -105,11 +105,11 @@ Deliver an SVG circuit editor in TypeScript, with no external dependencies, fram
 ## Final Metrics
 
 - **Files created:** ~45 source files + 4 test files + 10 roadmap files + configs
-- **Tests:** 45 passing
+- **Tests:** 195 passing
 - **TypeScript:** strict mode, zero errors
 - **Dependencies:** TypeScript + Vitest only (dev), zero runtime external deps
 - **Adapters:** 6/6 (Vanilla, React, Vue, Angular, Astro, Svelte)
-- **Supported elements:** 7/7 (R, C, L, Q, W, Ws, Wo)
+- **Supported elements:** 11/11 (R, C, L, Q, W, Ws, Wo, G, Pdw, CC, HN)
 
 ## Definition of Done — ALL MET ✅
 

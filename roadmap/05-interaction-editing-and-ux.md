@@ -6,7 +6,7 @@ Make the editor intuitive for both technical and non-technical users, with predi
 
 ## Implemented
 
-- `src/core/editor/toolbar.ts` — `buildToolbarHTML()`, `buildToolbarCSS()`, `attachToolbarEvents()`, element palette (R, C, L, Q, W, Ws, Wo), structure tools, navigation tools ✅
+- `src/core/editor/toolbar.ts` — `buildToolbarHTML()`, `buildToolbarCSS()`, `attachToolbarEvents()`, element palette (R, C, L, Q, W, Ws, Wo, G, Pdw, CC, HN), structure tools, navigation tools ✅
 - `src/core/editor/panels.ts` — `buildPropertiesPanelHTML()`, `buildDiagnosticsPanelHTML()`, `buildDslPanelHTML()`, `buildPropertiesCSS()`, `attachPropertiesEvents()` ✅
 - `src/core/editor/interaction.ts` — `attachInteractionEvents()`, pointer down/move/up, pan, drag, wheel zoom, keyboard shortcuts ✅
 - `src/core/editor/commands-builder.ts` — `buildInsertElementCommand()`, `buildDeleteNodeCommand()`, `buildMoveNodeCommand()`, `buildSetSelectionCommand()`, `insertElementIntoSeries()`, `deleteElementFromSeries()`, `generateNextElementId()`, `findNodeById()`, `countElements()`, `convertSeriesToParallel()`, etc. ✅
@@ -17,7 +17,7 @@ Make the editor intuitive for both technical and non-technical users, with predi
 
 ## User Tools
 
-- Main toolbar (element palette: R, C, L, Q, W, Ws, Wo). ✅
+- Main toolbar (element palette: R, C, L, Q, W, Ws, Wo, G, Pdw, CC, HN — **11 kinds**). ✅
 - Side panel for properties (element params, labels). ✅
 - Mini panel for contextual actions. ⚠️ (via toolbar context)
 - Synchronized DSL view. ✅ (`buildDslPanelHTML()`)
