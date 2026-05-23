@@ -82,6 +82,10 @@ export class PluginRegistry {
     }
   }
 
+  emit(event: string, data?: unknown): void {
+    this.eventHandlers.get(event)?.forEach(h => h(data));
+  }
+
   destroyAll(): void {
     for (const plugin of [...this.plugins].reverse()) {
       plugin.destroy();

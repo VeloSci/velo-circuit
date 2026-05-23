@@ -1,6 +1,6 @@
 import type { EditorPlugin, PluginContext } from './types.js';
 
-const KINDS = ['R', 'C', 'L', 'Q', 'W', 'Ws', 'Wo', 'G', 'Pdw'] as const;
+const KINDS = ['R', 'C', 'L', 'Q', 'W', 'Ws', 'Wo', 'G', 'Pdw', 'CC', 'HN'] as const;
 
 const CSS = `
 .ce-toolbar {
@@ -124,6 +124,8 @@ export function toolbarPlugin(): EditorPlugin {
         </div>
         <div class="ce-tb-sep"></div>
         <button class="ce-tb-action" data-act="params" title="Toggle parameters visibility">[P] Params</button>
+        <button class="ce-tb-action" data-act="strict" title="Strict validation mode">Strict</button>
+        <button class="ce-tb-action" data-act="grid" title="Grid catalog view">Grid</button>
         <button class="ce-tb-theme" data-act="theme" title="Toggle theme">🌓</button>
         <div class="ce-tb-dsl-mobile">
           <span class="ce-tb-label">Boukamp DSL</span>
@@ -182,6 +184,22 @@ export function toolbarPlugin(): EditorPlugin {
         ctx.editor.setShowParams(show);
         if (show) paramsBtn.classList.add('ce-active');
         else paramsBtn.classList.remove('ce-active');
+      });
+
+      const strictBtn = barEl.querySelector('[data-act="strict"]') as HTMLButtonElement;
+      strictBtn?.addEventListener('click', () => {
+        const strict = !ctx.editor.getStrict();
+        ctx.editor.setStrict(strict);
+        if (strict) strictBtn.classList.add('ce-active');
+        else strictBtn.classList.remove('ce-active');
+      });
+
+      const gridBtn = barEl.querySelector('[data-act="grid"]') as HTMLButtonElement;
+      gridBtn?.addEventListener('click', () => {
+        const next = ctx.editor.getViewMode() === 'grid' ? 'circuit' : 'grid';
+        ctx.editor.setViewMode(next);
+        if (next === 'grid') gridBtn.classList.add('ce-active');
+        else gridBtn.classList.remove('ce-active');
       });
 
       // Track selection

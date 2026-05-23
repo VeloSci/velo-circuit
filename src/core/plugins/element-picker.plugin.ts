@@ -1,4 +1,5 @@
 import type { EditorPlugin, PluginContext } from './types.js';
+import { HIDE_FLOATING_UI } from './overlay-ui.js';
 
 const CSS = `
 .ce-element-picker {
@@ -40,11 +41,11 @@ const CSS = `
 .ce-ep-btn[data-k="Pdw"]:hover  { background: var(--ce-Pdw-bg, #f3e8ff); }
 `;
 
-const KINDS = ['R', 'C', 'L', 'Q', 'W', 'Ws', 'Wo', 'G', 'Pdw'];
+const KINDS = ['R', 'C', 'L', 'Q', 'W', 'Ws', 'Wo', 'G', 'Pdw', 'CC', 'HN'];
 
 export interface PickerRequest {
   targetId: string;
-  position: 'before' | 'after' | 'parallel';
+  position: 'before' | 'after' | 'parallel' | 'replace';
   x: number;
   y: number;
 }
@@ -57,7 +58,11 @@ export function elementPickerPlugin(): EditorPlugin {
 
   function show(req: PickerRequest) {
     pending = req;
-    const cr = ctx.container.getBoundingClientRect();
+    const title = pickerEl.querySelector('[data-ref="title"]');
+    if (title) {
+      title.textContent = req.position === 'replace' ? 'Change element type' : 'Select element';
+    }
+    const cr = (ctx.container.querySelector('.ce-canvas') ?? ctx.container).getBoundingClientRect();
     pickerEl.style.left = Math.max(0, req.x - cr.left) + 'px';
     pickerEl.style.top = Math.max(0, req.y - cr.top) + 'px';
     pickerEl.classList.add('ce-visible');
@@ -78,9 +83,13 @@ export function elementPickerPlugin(): EditorPlugin {
 
   function onPick(kind: string) {
     if (pending) {
-      ctx.editor.insertRelative(pending.targetId, kind as any, pending.position);
+      if (pending.position === 'replace') {
+        ctx.editor.changeElementKind(pending.targetId, kind as import('../domain/circuit.js').ElementKind);
+      } else {
+        ctx.editor.insertRelative(pending.targetId, kind as import('../domain/circuit.js').ElementKind, pending.position);
+      }
     } else {
-      ctx.editor.insertElement(kind as any);
+      ctx.editor.insertElement(kind as import('../domain/circuit.js').ElementKind);
     }
     hide();
   }
@@ -95,11 +104,12 @@ export function elementPickerPlugin(): EditorPlugin {
       pickerEl.className = 'ce-element-picker';
       pickerEl.addEventListener('pointerdown', (e) => e.stopPropagation());
       pickerEl.innerHTML = `
-        <div class="ce-ep-title">Select element</div>
+        <div class="ce-ep-title" data-ref="title">Select element</div>
         <div class="ce-ep-grid">
           ${KINDS.map(k => `<button class="ce-ep-btn" data-k="${k}">${k}</button>`).join('')}
         </div>`;
-      ctx.container.appendChild(pickerEl);
+      const canvas = ctx.container.querySelector('.ce-canvas');
+      (canvas ?? ctx.container).appendChild(pickerEl);
 
       pickerEl.querySelectorAll('.ce-ep-btn').forEach(btn => {
         btn.addEventListener('click', () => onPick((btn as HTMLElement).dataset.k!));
@@ -108,6 +118,7 @@ export function elementPickerPlugin(): EditorPlugin {
       // Other plugins request the picker via event
       ctx.on('open-element-picker', (data) => show(data as PickerRequest));
       ctx.on('hide-element-picker', () => hide());
+      ctx.on(HIDE_FLOATING_UI, () => hide());
     },
     destroy() {
       hide();

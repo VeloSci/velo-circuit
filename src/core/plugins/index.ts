@@ -4,6 +4,8 @@ export { selectionPlugin } from './selection.plugin.js';
 export { contextMenuPlugin } from './context-menu.plugin.js';
 export { elementPickerPlugin } from './element-picker.plugin.js';
 export { floatingToolbarPlugin } from './floating-toolbar.plugin.js';
+export { paramEditPlugin } from './param-edit.plugin.js';
+export { gridViewPlugin } from './grid-view.plugin.js';
 export { keyboardPlugin } from './keyboard.plugin.js';
 export { toolbarPlugin } from './toolbar.plugin.js';
 export { dslPanelPlugin, diagnosticsPlugin, exportPanelPlugin } from './sidebar.plugin.js';
@@ -16,6 +18,8 @@ import { selectionPlugin } from './selection.plugin.js';
 import { contextMenuPlugin } from './context-menu.plugin.js';
 import { elementPickerPlugin } from './element-picker.plugin.js';
 import { floatingToolbarPlugin } from './floating-toolbar.plugin.js';
+import { paramEditPlugin } from './param-edit.plugin.js';
+import { gridViewPlugin } from './grid-view.plugin.js';
 import { keyboardPlugin } from './keyboard.plugin.js';
 import { toolbarPlugin } from './toolbar.plugin.js';
 import { dslPanelPlugin, diagnosticsPlugin, exportPanelPlugin } from './sidebar.plugin.js';
@@ -29,6 +33,7 @@ export function allPlugins(): EditorPlugin[] {
     elementPickerPlugin(),
     contextMenuPlugin(),
     floatingToolbarPlugin(),
+    gridViewPlugin(),
     keyboardPlugin(),
     toolbarPlugin(),
     dslPanelPlugin(),

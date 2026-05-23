@@ -1,4 +1,5 @@
 import type { EditorPlugin, PluginContext } from './types.js';
+import { HIDE_FLOATING_UI } from './overlay-ui.js';
 
 const CSS = `
 .ce-ctx-menu {
@@ -123,12 +124,21 @@ export function contextMenuPlugin(): EditorPlugin {
 
       const canvas = ctx.container.querySelector('.ce-canvas');
       canvas?.addEventListener('contextmenu', onContextMenu as EventListener);
+      canvas?.addEventListener('pointerdown', onCanvasPointerDown as EventListener);
+
+      ctx.on(HIDE_FLOATING_UI, () => hide());
     },
     destroy() {
       hide();
       menuEl?.remove();
       const canvas = ctx?.container?.querySelector('.ce-canvas');
       canvas?.removeEventListener('contextmenu', onContextMenu as EventListener);
+      canvas?.removeEventListener('pointerdown', onCanvasPointerDown as EventListener);
     },
   };
+
+  function onCanvasPointerDown(e: PointerEvent) {
+    if (e.button !== 0) return;
+    hide();
+  }
 }
