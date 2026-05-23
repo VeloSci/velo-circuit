@@ -25,7 +25,7 @@ Unknown codes produce a **lex** error. After parsing, `validate()` checks duplic
 ## parseBoukamp
 
 ```ts
-import { parseBoukamp } from 'velo-circuit-editor'
+import { parseBoukamp } from 'velo-circuit'
 
 const result = parseBoukamp('R0-p(R1,C1)')
 
@@ -48,7 +48,7 @@ parseBoukamp('CC1[50,1e-3,0.8]')  // bracket alias
 ## tokenize
 
 ```ts
-import { tokenize } from 'velo-circuit-editor'
+import { tokenize } from 'velo-circuit'
 
 const tokens = tokenize('R0-p(R1,C1)')
 ```
@@ -56,7 +56,7 @@ const tokens = tokenize('R0-p(R1,C1)')
 ## serialize
 
 ```ts
-import { serialize } from 'velo-circuit-editor'
+import { serialize } from 'velo-circuit'
 
 const dsl = serialize(ast)
 // → 'R0-p(R1,C1)-Wo2'
@@ -65,7 +65,7 @@ const dsl = serialize(ast)
 ## validate
 
 ```ts
-import { validate } from 'velo-circuit-editor'
+import { validate } from 'velo-circuit'
 
 const result = validate(ast)
 // → { issues: [...], hasErrors: false, hasWarnings: false }

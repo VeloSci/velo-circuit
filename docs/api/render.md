@@ -1,20 +1,65 @@
 # Render & Themes API
 
+SVG generation from layout graphs and Boukamp DSL strings.
+
+## renderDslPreviewSvg
+
+**Recommended** for docs, thumbnails, and read-only diagrams:
+
+```ts
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+const svg = renderDslPreviewSvg('R0-p(R1,C1)-Wo2', {
+  themeMode: 'dark',           // 'light' | 'dark'
+  colorMode: 'multicolor',     // 'multicolor' | 'bicolor'
+  connectionStyle: 'curved',   // 'curved' | 'orthogonal' (default: curved)
+  showParams: false,
+  showLabels: true,
+})
+// → standalone <svg class="circuit-preview">…</svg> with embedded CSS
+```
+
+See [Static SVG Rendering](/guide/static-rendering) for usage patterns in apps and documentation.
+
+## renderDslToSvg
+
+Parse DSL and render without embedding theme CSS:
+
+```ts
+import { renderDslToSvg, getTheme } from 'velo-circuit'
+
+const svg = renderDslToSvg('R0-C1', {
+  preview: true,
+  theme: getTheme('dark'),
+  connectionStyle: 'curved',
+})
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `preview` | `boolean` | `false` | No selection chrome; transparent background |
+| `connectionStyle` | `'curved' \| 'orthogonal'` | `'curved'` | Wire routing between ports |
+| `showLabels` | `boolean` | `true` | Element ID labels under symbols |
+| `showParams` | `boolean` | `false` | Parameter text instead of IDs |
+| `theme` | `RenderTheme` | `DEFAULT_THEME` | Stroke, text, and layout tokens |
+
 ## renderCircuit
 
 ```ts
-import { renderCircuit } from 'velo-circuit-editor'
+import { renderCircuit } from 'velo-circuit'
 
 const svg = renderCircuit(graph, viewport, options)
 // → '<svg xmlns="...">...</svg>'
 ```
 
+Use for graphs already built with `buildLayout`. Set `preview: true` for the same chrome-free output as `renderDslToSvg`.
+
 ## renderCircuitEx
 
-Extended renderer with themes and selection:
+Extended renderer with selection handles and overlays:
 
 ```ts
-import { renderCircuitEx } from 'velo-circuit-editor'
+import { renderCircuitEx } from 'velo-circuit'
 
 const svg = renderCircuitEx(graph, viewport, {
   themeMode: 'dark',
@@ -26,60 +71,63 @@ const svg = renderCircuitEx(graph, viewport, {
 
 ## Themes
 
-### Light Theme
+### Light / dark
 
 ```ts
-import { DEFAULT_THEME } from 'velo-circuit-editor'
+import { DEFAULT_THEME, DARK_THEME, getTheme, toggleTheme } from 'velo-circuit'
+
+const theme = getTheme('dark')
 ```
 
-### Dark Theme
+### Symbol color modes
+
+| Mode | Behavior |
+|------|----------|
+| `multicolor` | Per-kind strokes (`--ce-R-stroke`, `--ce-C-stroke`, …) matching the editor |
+| `bicolor` | Single `--ce-stroke` from the active theme |
+
+Tokens are defined in `ELEMENT_STROKE_COLORS` for light and dark.
+
+### CSS builders
 
 ```ts
-import { DARK_THEME } from 'velo-circuit-editor'
+import { buildThemeCSS, buildPreviewThemeCSS, buildElementStrokeCSS } from 'velo-circuit'
+
+// Editor / export with selection chrome
+buildThemeCSS(theme, { colorMode: 'multicolor', themeMode: 'dark' })
+
+// Static preview (transparent bg, no hover)
+buildPreviewThemeCSS(theme, { colorMode: 'multicolor', themeMode: 'dark' })
 ```
 
-### getTheme
+## exportSvgWithStyles / exportPreviewSvgWithStyles
+
+Embed CSS inside the SVG for standalone files:
 
 ```ts
-import { getTheme, toggleTheme } from 'velo-circuit-editor'
+import { exportSvgWithStyles, exportPreviewSvgWithStyles } from 'velo-circuit'
 
-let mode: ThemeMode = 'light'
-mode = toggleTheme(mode) // 'dark'
-const theme = getTheme(mode)
-```
-
-## exportSvgWithStyles
-
-Embed CSS into the SVG string for standalone export:
-
-```ts
-import { exportSvgWithStyles } from 'velo-circuit-editor'
-
-const standalone = exportSvgWithStyles(svg, DARK_THEME, {
-  colorMode: 'multicolor', // or 'bicolor'
-  themeMode: 'dark',
-})
-// Contains <style>...</style> inside the SVG
-```
-
-## renderDslPreviewSvg
-
-One-shot helper for docs and thumbnails — parses DSL, renders SVG, and embeds theme CSS:
-
-```ts
-import { renderDslPreviewSvg } from 'velo-circuit-editor'
-
-const svg = renderDslPreviewSvg('R0-p(R1,C1)', {
-  themeMode: 'dark',
+// Editor-style export
+const editorSvg = exportSvgWithStyles(svg, DARK_THEME, {
   colorMode: 'multicolor',
-  connectionStyle: 'curved', // default — use 'orthogonal' for right-angle wires
+  themeMode: 'dark',
+})
+
+// Preview-style export (used by renderDslPreviewSvg)
+const previewSvg = exportPreviewSvgWithStyles(svg, DARK_THEME, {
+  colorMode: 'bicolor',
+  themeMode: 'light',
 })
 ```
+
+## Junction hubs
+
+Parallel branches use empty junction nodes. Dots are placed at the **wire hub port** (where connections converge), via `getJunctionHub()` in `graph.ts` — not at the geometric center of the junction box.
 
 ## Viewport Controller
 
 ```ts
-import { createViewportController } from 'velo-circuit-editor'
+import { createViewportController } from 'velo-circuit'
 
 const vc = createViewportController({ panX: 0, panY: 0, zoom: 1, width: 800, height: 600 })
 
@@ -92,13 +140,13 @@ vc.reset()
 ## buildSvgElementSymbol
 
 ```ts
-import { buildSvgElementSymbol, ElementKind } from 'velo-circuit-editor'
+import { buildSvgElementSymbol, ElementKind } from 'velo-circuit'
 
 const symbol = buildSvgElementSymbol(ElementKind.Resistor, DEFAULT_THEME)
 // → '<g>…</g>'  (outline paths, fill="none")
 ```
 
-All symbols use an **80×40** viewBox with terminals at **(0, 20)** and **(80, 20)**. Base stroke width is **2.0 px** (`theme.strokeWidth`). Stroke multipliers and per-kind geometry are documented in the [Symbol Design System](/reference/symbol-design-system).
+All symbols use an **80×40** viewBox with terminals at **(0, 20)** and **(80, 20)**. Base stroke width is **2.0 px** (`theme.strokeWidth`). See the [Symbol Design System](/reference/symbol-design-system).
 
 | Kind | Code | Symbol highlights |
 |------|------|-------------------|
@@ -117,3 +165,22 @@ All symbols use an **80×40** viewBox with terminals at **(0, 20)** and **(80, 2
 Per-kind stroke color uses CSS variables `--ce-{kind}-stroke` on `.circuit-node[data-kind="…"]`.
 
 Implementation: [`src/core/render-svg/symbols.ts`](../../src/core/render-svg/symbols.ts).
+
+## Types
+
+```ts
+type ConnectionStyle = 'curved' | 'orthogonal'
+type SymbolColorMode = 'multicolor' | 'bicolor'
+type ThemeMode = 'light' | 'dark'
+
+interface DslPreviewOptions {
+  theme?: RenderTheme
+  themeMode?: ThemeMode
+  colorMode?: SymbolColorMode
+  connectionStyle?: ConnectionStyle
+  showLabels?: boolean
+  showParams?: boolean
+  width?: number | string
+  height?: number | string
+}
+```

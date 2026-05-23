@@ -5,7 +5,7 @@ Position circuit nodes deterministically from an AST.
 ## buildLayout
 
 ```ts
-import { buildLayout } from 'velo-circuit-editor'
+import { buildLayout } from 'velo-circuit'
 
 const graph = buildLayout(ast)
 // → EditableGraph
@@ -14,7 +14,7 @@ const graph = buildLayout(ast)
 ## computeBounds
 
 ```ts
-import { computeBounds } from 'velo-circuit-editor'
+import { computeBounds } from 'velo-circuit'
 
 const bounds = computeBounds(graph)
 // → { width, height, minX, minY }
@@ -23,7 +23,7 @@ const bounds = computeBounds(graph)
 ## Layout Options
 
 ```ts
-import { DEFAULT_LAYOUT_OPTIONS } from 'velo-circuit-editor'
+import { DEFAULT_LAYOUT_OPTIONS } from 'velo-circuit'
 
 buildLayout(ast, {
   horizontalSpacing: 80,  // default: 60
@@ -57,25 +57,37 @@ interface ElementNode {
 ## Resetting Node ID Counter
 
 ```ts
-import { resetNodeIdCounter } from 'velo-circuit-editor'
+import { resetNodeIdCounter } from 'velo-circuit'
 
 resetNodeIdCounter()
+```
+
+## Junction hubs
+
+Parallel branches insert empty junction nodes. Dots are rendered at the port where wires converge:
+
+```ts
+import { getJunctionHub } from 'velo-circuit'
+
+const { x, y } = getJunctionHub(junctionNode, graph)
 ```
 
 ## Use with Renderer
 
 ```ts
-import { buildLayout, computeBounds } from 'velo-circuit-editor'
-import { renderCircuit, DEFAULT_THEME } from 'velo-circuit-editor'
+import { buildLayout, computeBounds, renderDslPreviewSvg, renderCircuit, getTheme } from 'velo-circuit'
 
+// Recommended for static output
+const svg = renderDslPreviewSvg('R0-p(R1,C1)', { themeMode: 'dark' })
+
+// Lower-level
 const graph = buildLayout(ast)
 const bounds = computeBounds(graph)
-
-const svg = renderCircuit(graph, {
+const raw = renderCircuit(graph, {
   panX: -bounds.minX + 20,
   panY: -bounds.minY + 20,
   zoom: 1,
   width: bounds.width,
   height: bounds.height,
-}, { theme: DEFAULT_THEME, showGrid: true })
+}, { preview: true, theme: getTheme('dark') })
 ```

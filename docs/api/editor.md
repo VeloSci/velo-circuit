@@ -5,7 +5,7 @@ The editor is the main entry point for building interactive circuit editors.
 ## createEditor
 
 ```ts
-import { createEditor } from 'velo-circuit-editor'
+import { createEditor } from 'velo-circuit'
 
 const editor = createEditor()
 ```
@@ -42,7 +42,7 @@ const doc = editor.getDocument()
 ## dispatch
 
 ```ts
-import type { InsertElementCommand } from 'velo-circuit-editor'
+import type { InsertElementCommand } from 'velo-circuit'
 
 editor.dispatch({
   type: 'insert-element',
@@ -83,17 +83,48 @@ editor.redo()
 editor.destroy()
 ```
 
+## render
+
+Export the current canvas as an SVG string (interactive chrome included):
+
+```ts
+const svg = editor.render()
+// Embed or download; use exportSvgWithStyles() for standalone CSS
+```
+
+## fitView / setShowParams / setStrict
+
+```ts
+editor.fitView()
+editor.setShowParams(true)
+editor.setStrict(true)
+```
+
+## Static preview (without editor)
+
+```ts
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+const diagram = renderDslPreviewSvg(editor.getValue(), {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+})
+```
+
+Use when you need a read-only schematic matching the editor palette. See [Static SVG Rendering](/guide/static-rendering).
+
 ## Toolbar and Panels
 
 ```ts
-import { buildToolbarHTML, buildToolbarCSS } from 'velo-circuit-editor'
+import { buildToolbarHTML, buildToolbarCSS } from 'velo-circuit'
 
 document.head.innerHTML += `<style>${buildToolbarCSS()}</style>`
 toolbar.innerHTML = buildToolbarHTML()
 ```
 
 ```ts
-import { buildPropertiesPanelHTML, buildDiagnosticsPanelHTML } from 'velo-circuit-editor'
+import { buildPropertiesPanelHTML, buildDiagnosticsPanelHTML } from 'velo-circuit'
 
 sidebar.innerHTML = buildPropertiesPanelHTML(node) +
                     buildDiagnosticsPanelHTML(issues)
@@ -102,7 +133,7 @@ sidebar.innerHTML = buildPropertiesPanelHTML(node) +
 ## Interaction
 
 ```ts
-import { attachInteractionEvents } from 'velo-circuit-editor'
+import { attachInteractionEvents } from 'velo-circuit'
 
 attachInteractionEvents(container, {
   onToolSelect: (id) => selectTool(id),
