@@ -25,7 +25,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
       { text: 'Examples', link: '/examples/basic-circuit', activeMatch: '/examples/' },
       { text: 'API', link: '/api/core', activeMatch: '/api/' },
-      { text: 'Adapters', link: '/adapters/vanilla', activeMatch: '/adapters/' },
+      { text: 'Adapters', link: '/adapters/', activeMatch: '/adapters/' },
       { text: 'Reference', link: '/reference/boukamp-syntax', activeMatch: '/reference/' },
       { text: 'Playground', link: '/playground/', activeMatch: '/playground/' },
     ],
@@ -33,6 +33,7 @@ export default defineConfig({
       '/guide/': [
         { text: 'Guide', items: [
           { text: 'Getting Started', link: '/guide/getting-started' },
+          { text: 'Static SVG Rendering', link: '/guide/static-rendering' },
           { text: 'Architecture', link: '/guide/architecture' },
           { text: 'Core Concepts', link: '/guide/core-concepts' },
           { text: 'Boukamp DSL', link: '/guide/boukamp-dsl' },
@@ -62,6 +63,7 @@ export default defineConfig({
       ],
       '/adapters/': [
         { text: 'Adapters', items: [
+          { text: 'Overview', link: '/adapters/' },
           { text: 'Vanilla JS', link: '/adapters/vanilla' },
           { text: 'React', link: '/adapters/react' },
           { text: 'Vue 3', link: '/adapters/vue' },
