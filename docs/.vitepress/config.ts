@@ -44,6 +44,9 @@ export default defineConfig({
           { text: 'Basic Circuit', link: '/examples/basic-circuit' },
           { text: 'Randles Circuit', link: '/examples/randles-circuit' },
           { text: 'Warburg Elements', link: '/examples/warburg-elements' },
+          { text: 'Gerischer', link: '/examples/gerischer' },
+          { text: 'Cole-Cole & HN', link: '/examples/cole-cole-hn' },
+          { text: 'PDW Diffusion', link: '/examples/pdw-diffusion' },
           { text: 'Nested Circuits', link: '/examples/nested-circuits' },
           { text: 'CPE and Complex', link: '/examples/cpe-and-complex' },
         ]},
@@ -70,7 +73,9 @@ export default defineConfig({
       '/reference/': [
         { text: 'Reference', items: [
           { text: 'Boukamp Syntax', link: '/reference/boukamp-syntax' },
+          { text: 'Unified Circuit DSL', link: '/reference/unified-circuit-dsl' },
           { text: 'Element Types', link: '/reference/element-types' },
+          { text: 'Symbol Design System', link: '/reference/symbol-design-system' },
         ]},
       ],
       '/playground/': [
