@@ -151,6 +151,30 @@ export function buildSvgElementSymbol(kind: ElementKind, theme: RenderTheme): st
       </g>`;
     }
 
+    // ─── Cole-Cole (CC): dispersion arc ───
+    case 'CC' as ElementKind: {
+      return `<g>
+        <line x1="0" y1="20" x2="18" y2="20" stroke="${kindStroke}" stroke-width="${sw}" />
+        <rect x="18" y="8" width="44" height="24" stroke="${kindStroke}" stroke-width="${sw}" fill="${colors.fill}" rx="4" />
+        <path d="M26,28 A16,16 0 0 1 54,12" stroke="${kindStroke}" stroke-width="${sw * 1.1}" fill="none" />
+        <text x="40" y="24" text-anchor="middle" font-size="${fontSize * 0.75}" font-family="${fontFamily}" fill="${kindStroke}">CC</text>
+        <text x="40" y="36" text-anchor="middle" font-size="${fontSize * 0.55}" font-family="${fontFamily}" fill="${kindStroke}">α</text>
+        <line x1="62" y1="20" x2="80" y2="20" stroke="${kindStroke}" stroke-width="${sw}" />
+      </g>`;
+    }
+
+    // ─── Havriliak-Negami (HN): dual-exponent dispersion ───
+    case 'HN' as ElementKind: {
+      return `<g>
+        <line x1="0" y1="20" x2="18" y2="20" stroke="${kindStroke}" stroke-width="${sw}" />
+        <rect x="18" y="8" width="44" height="24" stroke="${kindStroke}" stroke-width="${sw}" fill="${colors.fill}" rx="4" />
+        <path d="M26,28 A14,14 0 0 1 50,14 A10,10 0 0 1 54,12" stroke="${kindStroke}" stroke-width="${sw * 1.1}" fill="none" />
+        <text x="40" y="22" text-anchor="middle" font-size="${fontSize * 0.7}" font-family="${fontFamily}" fill="${kindStroke}">HN</text>
+        <text x="40" y="36" text-anchor="middle" font-size="${fontSize * 0.5}" font-family="${fontFamily}" fill="${kindStroke}">α,β</text>
+        <line x1="62" y1="20" x2="80" y2="20" stroke="${kindStroke}" stroke-width="${sw}" />
+      </g>`;
+    }
+
     // ─── Fallback: generic box ───
     default: {
       return `<g>

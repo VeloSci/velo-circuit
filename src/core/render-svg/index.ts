@@ -1,6 +1,7 @@
 export * from './symbols.js';
 export * from './renderer.js';
 export * from './renderer-ex.js';
+export * from './infinite-grid.js';
 export * from './themes.js';
 export * from './viewport.js';
 export type { RenderTheme, ThemeColors } from './symbols.js';
