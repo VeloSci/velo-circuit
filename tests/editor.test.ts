@@ -75,4 +75,41 @@ describe('Standalone SVG API', () => {
     const svg = renderDslToSvg('invalid:::');
     expect(svg).toBe('');
   });
+
+  it('renderDslPreviewSvg omits editor chrome and uses curved wires by default', async () => {
+    const { renderDslPreviewSvg } = await import('../src/core/render-svg/renderer-ex.js');
+    const svg = renderDslPreviewSvg('R0-p(R1,C1)-W2', { themeMode: 'dark', colorMode: 'multicolor' });
+    expect(svg).toContain('class="circuit-preview"');
+    expect(svg).not.toContain('node-bg');
+    expect(svg).not.toContain('node-hit');
+    expect(svg).toMatch(/ C \d+ \d+ \d+ \d+ \d+ \d+/);
+    expect(svg).toContain('--ce-R-stroke');
+    expect(svg).toContain('data-element-id="C1"');
+  });
+
+  it('renderDslPreviewSvg supports orthogonal wires', async () => {
+    const { renderDslPreviewSvg } = await import('../src/core/render-svg/renderer-ex.js');
+    const svg = renderDslPreviewSvg('R0-p(R1,C1)-W2', { connectionStyle: 'orthogonal' });
+    expect(svg).toMatch(/L \d+ \d+ L \d+ \d+ L \d+ \d+/);
+    expect(svg).not.toMatch(/ C \d+ \d+ \d+ \d+ \d+ \d+/);
+  });
+
+  it('places junction dots at wire hub ports', async () => {
+    const { parseBoukamp } = await import('../src/core/parser-bridge/index.js');
+    const { buildLayout } = await import('../src/core/layout/index.js');
+    const { getJunctionHub } = await import('../src/core/domain/graph.js');
+    const { renderDslPreviewSvg } = await import('../src/core/render-svg/renderer-ex.js');
+
+    const graph = buildLayout(parseBoukamp('R0-p(R1,C1)') as import('../src/core/domain/circuit.js').CircuitNode);
+    const junctions = [...graph.nodes.values()].filter(
+      n => n.circuitNode.type === 'parallel' && (n.circuitNode as { children?: unknown[] }).children?.length === 0,
+    );
+    expect(junctions.length).toBe(2);
+
+    for (const junction of junctions) {
+      const hub = getJunctionHub(junction, graph);
+      const svg = renderDslPreviewSvg('R0-p(R1,C1)', { connectionStyle: 'orthogonal' });
+      expect(svg).toContain(`cx="${hub.x}" cy="${hub.y}"`);
+    }
+  });
 });
