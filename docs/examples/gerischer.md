@@ -23,7 +23,7 @@ Solution resistance in series with a Randles branch and a Gerischer diffusion–
 <CircuitSvgPreview dsl="R0-p(R1,C1)-G2{1e-3,0.05}" maxWidth="480px" />
 
 ```ts
-import { createEditor } from 'velo-circuit-editor'
+import { createEditor } from 'velo-circuit'
 
 const editor = createEditor()
 editor.mount(document.getElementById('canvas'), {

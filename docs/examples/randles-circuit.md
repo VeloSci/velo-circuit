@@ -17,7 +17,7 @@ The parallel branch `p(R1,C1)` represents the charge-transfer resistance (`R1`) 
 ## Code
 
 ```ts
-import { createEditor } from 'velo-circuit-editor'
+import { createEditor } from 'velo-circuit'
 
 const editor = createEditor()
 

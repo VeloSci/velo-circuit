@@ -23,7 +23,7 @@ For a single stroke color that follows the theme, add `colorMode="bicolor"`.
 ## Live Example
 
 ```ts
-import { createEditor } from 'velo-circuit-editor'
+import { createEditor } from 'velo-circuit'
 
 const editor = createEditor()
 
