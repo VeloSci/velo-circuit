@@ -31,6 +31,14 @@ export interface DocumentMetadata {
   createdAt: number;
   modifiedAt: number;
   showParams: boolean;
+  strict: boolean;
+  viewMode: 'circuit' | 'grid';
+}
+
+export interface CircuitGridRow {
+  id: string;
+  dsl: string;
+  meta?: Record<string, unknown>;
 }
 
 export interface CircuitDocument {
@@ -41,6 +49,7 @@ export interface CircuitDocument {
   history: HistoryState;
   diagnostics: Diagnostic[];
   metadata: DocumentMetadata;
+  gridRows?: CircuitGridRow[];
 }
 
 export function defaultViewport(): ViewportState {
@@ -57,5 +66,13 @@ export function emptyHistory(): HistoryState {
 
 export function emptyMetadata(): DocumentMetadata {
   const now = Date.now();
-  return { name: 'Untitled Circuit', version: 1, createdAt: now, modifiedAt: now, showParams: false };
+  return {
+    name: 'Untitled Circuit',
+    version: 1,
+    createdAt: now,
+    modifiedAt: now,
+    showParams: false,
+    strict: false,
+    viewMode: 'circuit',
+  };
 }

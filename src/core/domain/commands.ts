@@ -8,6 +8,9 @@ export type CommandType =
   | 'convert-to-parallel'
   | 'update-params'
   | 'toggle-params'
+  | 'toggle-strict'
+  | 'set-view-mode'
+  | 'set-grid-rows'
   | 'set-selection'
   | 'viewport-change'
   | 'load-circuit'
@@ -61,6 +64,21 @@ export interface ToggleParamsCommand extends BaseCommand {
   show: boolean;
 }
 
+export interface ToggleStrictCommand extends BaseCommand {
+  type: 'toggle-strict';
+  strict: boolean;
+}
+
+export interface SetViewModeCommand extends BaseCommand {
+  type: 'set-view-mode';
+  viewMode: 'circuit' | 'grid';
+}
+
+export interface SetGridRowsCommand extends BaseCommand {
+  type: 'set-grid-rows';
+  rows: import('./document.js').CircuitGridRow[];
+}
+
 export interface SetSelectionCommand extends BaseCommand {
   type: 'set-selection';
   selectedIds: string[];
@@ -82,6 +100,9 @@ export type EditorCommand =
   | MoveNodeCommand
   | UpdateParamsCommand
   | ToggleParamsCommand
+  | ToggleStrictCommand
+  | SetViewModeCommand
+  | SetGridRowsCommand
   | SetSelectionCommand
   | LoadCircuitCommand
   | ImportDslCommand

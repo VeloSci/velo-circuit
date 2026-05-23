@@ -1,4 +1,5 @@
 export * from './circuit.js';
+export * from './param-labels.js';
 export * from './graph.js';
 export * from './document.js';
 export * from './validation.js';
