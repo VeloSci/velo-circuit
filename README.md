@@ -8,6 +8,10 @@ Framework-agnostic SVG circuit editor for Boukamp DSL circuits used in electroch
 - Pure TypeScript core with no runtime UI framework dependency
 - Official adapters for React, Vue, Svelte, Angular, Astro and Vanilla
 - Built-in editor interactions: zoom, pan, drag, diagnostics, undo/redo
+- Parameterized DSL: `R0{50}-Q1{5e-5,0.8}` with strict validation mode
+- SVG-first canvas with world-space infinite grid
+- `createCircuitGrid()` catalog view (DSL + SVG columns) and editor grid mode
+- Full parity with `velo-spectroz` circuit elements (11 types including `CC`, `HN`)
 - Designed to integrate with scientific tooling such as `velo-spectroz`
 
 ## Install
@@ -38,6 +42,30 @@ editor.mount(document.getElementById('canvas'), {
 editor.on('ast-changed', () => {
   console.log(editor.getValue());
 });
+```
+
+## Circuit grid catalog
+
+```ts
+import { createCircuitGrid } from 'velo-circuit';
+
+const grid = createCircuitGrid({
+  height: 480,
+  rowHeight: 120,
+  strict: true,
+  columns: [
+    { id: 'dsl', label: 'Linear DSL', type: 'dsl', width: 320 },
+    { id: 'svg', label: 'Circuit', type: 'svg', width: 220 },
+    { id: 'params', label: 'Parameters', type: 'params', width: 200 },
+  ],
+  initialRows: [
+    { id: 'r1', dsl: 'R0{50}-p(R1{100},C1{1e-5})' },
+    { id: 'r2', dsl: 'R0{10}-CC1{50,1e-3,0.8}' },
+  ],
+});
+
+grid.mount(document.getElementById('grid')!);
+grid.on('row-double-click', (row) => console.log(row));
 ```
 
 ## Local Development
