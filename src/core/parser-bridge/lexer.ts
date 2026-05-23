@@ -1,5 +1,17 @@
 export interface Token {
-  type: 'element-code' | 'element-id' | 'dash' | 'parallel-kw' | 'lparen' | 'rparen' | 'comma' | 'lbracket' | 'rbracket' | 'number';
+  type:
+    | 'element-code'
+    | 'element-id'
+    | 'dash'
+    | 'parallel-kw'
+    | 'lparen'
+    | 'rparen'
+    | 'comma'
+    | 'lbracket'
+    | 'rbracket'
+    | 'lbrace'
+    | 'rbrace'
+    | 'number';
   value: string;
   position: number;
 }
@@ -11,7 +23,8 @@ export interface LexError {
   message: string;
 }
 
-const ELEMENT_CODES = ['Pdw', 'Ws', 'Wo', 'R', 'C', 'L', 'Q', 'W', 'G'];
+/** Longest-match order (matches velo-spectroz lexer). */
+const ELEMENT_CODES = ['Pdw', 'Ws', 'Wo', 'CC', 'HN', 'R', 'C', 'L', 'Q', 'W', 'G'];
 
 export function tokenize(input: string): Token[] | LexError {
   const tokens: Token[] = [];
@@ -61,6 +74,18 @@ export function tokenize(input: string): Token[] | LexError {
       continue;
     }
 
+    if (ch === '{') {
+      tokens.push({ type: 'lbrace', value: '{', position: i });
+      i++;
+      continue;
+    }
+
+    if (ch === '}') {
+      tokens.push({ type: 'rbrace', value: '}', position: i });
+      i++;
+      continue;
+    }
+
     if (ch === 'p' && input[i + 1] === '(') {
       tokens.push({ type: 'parallel-kw', value: 'p', position: i });
       i++;
@@ -80,16 +105,19 @@ export function tokenize(input: string): Token[] | LexError {
       }
 
       if (numStr === '') {
-        return { type: 'lex', position: i, found: code, message: `Element code '${code}' must be followed by a numeric id` };
+        return {
+          type: 'lex',
+          position: i,
+          found: code,
+          message: `Element code '${code}' must be followed by a numeric id`,
+        };
       }
 
       tokens.push({ type: 'element-id', value: numStr, position: i - numStr.length });
       continue;
     }
 
-    // Number parsing (e.g. 50, 1.5, 1e-6, -2.3)
-    if (/[\d\.\+\-eE]/.test(ch)) {
-      // Very basic float check, could be improved but covers typical JS numbers
+    if (/[\d.\+\-eE]/.test(ch)) {
       const numMatch = input.substring(i).match(/^[-+]?(?:\d*\.?\d+)(?:[eE][-+]?\d+)?/);
       if (numMatch) {
         tokens.push({ type: 'number', value: numMatch[0], position: i });

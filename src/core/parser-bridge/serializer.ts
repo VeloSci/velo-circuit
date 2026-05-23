@@ -1,20 +1,24 @@
 import type { CircuitNode } from '../domain/circuit.js';
 
-/**
- * Serialize a CircuitNode AST back into Boukamp DSL notation.
- *
- * Supports N-branch parallel groups: p(a,b,c,...)
- */
 export interface SerializeOptions {
   showParams?: boolean;
+  /** Canonical brace `{...}` or legacy bracket `[...]`. Default: brace. */
+  paramFormat?: 'brace' | 'bracket';
+}
+
+function formatParams(params: number[], format: 'brace' | 'bracket'): string {
+  const inner = params.join(',');
+  return format === 'bracket' ? `[${inner}]` : `{${inner}}`;
 }
 
 export function serialize(ast: CircuitNode, options?: SerializeOptions): string {
+  const paramFormat = options?.paramFormat ?? 'brace';
+
   switch (ast.type) {
     case 'element': {
       let str = `${ast.kind}${ast.id}`;
       if (options?.showParams && ast.params && ast.params.length > 0) {
-        str += `[${ast.params.join(',')}]`;
+        str += formatParams(ast.params, paramFormat);
       }
       return str;
     }

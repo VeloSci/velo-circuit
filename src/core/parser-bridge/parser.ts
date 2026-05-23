@@ -1,8 +1,10 @@
 import type { CircuitNode, ElementKind } from '../domain/circuit.js';
+import { nParams } from '../domain/circuit.js';
 import type { Token, LexError } from './lexer.js';
 import { tokenize } from './lexer.js';
+import { assignParamOffsets } from './element-registry.js';
 
-const ELEMENT_CODE_LIST = 'R, C, L, Q, W, Ws, Wo, G, Pdw';
+const ELEMENT_CODE_LIST = 'R, C, L, Q, W, Ws, Wo, G, Pdw, CC, HN';
 
 export interface ParseError {
   type: 'parse';
@@ -25,6 +27,8 @@ function kindFromCode(code: string): ElementKind {
     case 'Wo': return 'Wo' as ElementKind;
     case 'G': return 'G' as ElementKind;
     case 'Pdw': return 'Pdw' as ElementKind;
+    case 'CC': return 'CC' as ElementKind;
+    case 'HN': return 'HN' as ElementKind;
     default:
       throw new Error(`Unknown element code: ${code}`);
   }
@@ -34,6 +38,7 @@ class Parser {
   private tokens: Token[];
   private pos = 0;
   private input: string;
+  private nextOffset = 0;
 
   constructor(tokens: Token[], input: string) {
     this.tokens = tokens;
@@ -44,7 +49,6 @@ class Parser {
     try {
       const result = this.parseCircuit();
 
-      // Check for remaining tokens — that's an error
       if (this.pos < this.tokens.length) {
         const remaining = this.peek()!;
         return {
@@ -56,7 +60,7 @@ class Parser {
         };
       }
 
-      return result;
+      return assignParamOffsets(result);
     } catch (err) {
       if (err && typeof err === 'object' && 'type' in err && (err as { type: string }).type === 'parse') {
         return err as ParseError;
@@ -114,7 +118,6 @@ class Parser {
     while (this.peek()?.type === 'dash') {
       this.consume();
 
-      // Validate there's something after the dash
       if (!this.peek()) {
         const err: ParseError = {
           type: 'parse',
@@ -165,11 +168,8 @@ class Parser {
     this.expectType('lparen', 'Expected "(" after parallel keyword "p"');
 
     const branches: CircuitNode[] = [];
-
-    // First branch (required)
     branches.push(this.parseCircuit());
 
-    // Subsequent branches separated by commas (at least one more required)
     if (this.peek()?.type !== 'comma') {
       const position = this.peek()?.position ?? this.input.length;
       const found = this.peek()?.value ?? 'end of input';
@@ -184,9 +184,8 @@ class Parser {
     }
 
     while (this.peek()?.type === 'comma') {
-      this.consume(); // consume comma
+      this.consume();
 
-      // Validate there's something after the comma
       if (!this.peek() || this.peek()!.type === 'rparen') {
         const position = this.peek()?.position ?? this.input.length;
         const err: ParseError = {
@@ -207,40 +206,43 @@ class Parser {
     return { type: 'parallel', children: branches };
   }
 
+  private parseEmbeddedParams(): number[] | undefined {
+    const open = this.peek()?.type;
+    if (open !== 'lbracket' && open !== 'lbrace') return undefined;
+
+    const closeType = open === 'lbracket' ? 'rbracket' : 'rbrace';
+    const openLabel = open === 'lbracket' ? '[' : '{';
+    const closeLabel = open === 'lbracket' ? ']' : '}';
+
+    this.consume();
+    const params: number[] = [];
+
+    while (this.peek()?.type !== closeType) {
+      const numTok = this.expectType('number', 'Expected number for parameter value');
+      params.push(parseFloat(numTok.value));
+
+      if (this.peek()?.type === 'comma') {
+        this.consume();
+      } else if (this.peek()?.type !== closeType) {
+        break;
+      }
+    }
+
+    this.expectType(closeType, `Expected "${closeLabel}" to close parameters`);
+    return params;
+  }
+
   parseElement(): CircuitNode {
     const codeTok = this.expectType('element-code', `Expected element code (${ELEMENT_CODE_LIST})`);
-    const idTok = this.expectType('element-id', `Expected numeric id after element code "${codeTok.value}" (e.g. ${codeTok.value}0, ${codeTok.value}1)`);
+    const idTok = this.expectType('element-id', `Expected numeric id after element code "${codeTok.value}"`);
 
     const kind = kindFromCode(codeTok.value);
     const id = parseInt(idTok.value, 10);
+    const params = this.parseEmbeddedParams();
+    const paramOffset = this.nextOffset;
+    this.nextOffset += nParams(kind);
 
-    let params: number[] | undefined;
-
-    if (this.peek()?.type === 'lbracket') {
-      this.consume(); // consume '['
-      params = [];
-
-      // Parse comma-separated numbers
-      let parsingParams = true;
-      while (parsingParams) {
-        if (this.peek()?.type === 'rbracket') {
-          break;
-        }
-
-        const numTok = this.expectType('number', 'Expected number for parameter value');
-        params.push(parseFloat(numTok.value));
-
-        if (this.peek()?.type === 'comma') {
-          this.consume(); // consume ','
-        } else {
-          parsingParams = false;
-        }
-      }
-
-      this.expectType('rbracket', 'Expected "]" to close parameters');
-    }
-
-    return { type: 'element', kind, id, paramOffset: 0, params };
+    return { type: 'element', kind, id, paramOffset, params };
   }
 }
 

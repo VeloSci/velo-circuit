@@ -1,28 +1,20 @@
 import type { CircuitNode } from '../domain/circuit.js';
-import type { ValidationResult, ValidationIssue, ValidationError, ValidationWarning } from '../domain/validation.js';
+import type { ValidationResult, ValidationIssue } from '../domain/validation.js';
 import { ELEMENT_KINDS, nParams, traverseNodes } from '../domain/circuit.js';
+import { ElementRegistry } from './element-registry.js';
+import { invalidParameterReason } from './physical.js';
+
+export interface ValidateOptions {
+  /** Promote warnings to errors. */
+  strict?: boolean;
+}
 
 /**
- * Comprehensive circuit validator.
- *
- * Detects multiple error types:
- * - duplicate-id: same (kind, id) pair appears more than once
- * - empty-circuit: AST has zero elements
- * - empty-parallel: parallel node with zero children
- * - empty-series: series node with zero children
- * - single-branch-parallel: parallel node with only 1 child (should be unwrapped)
- * - dangling-element: element in a structure that would leave it unconnected
- *
- * Warnings:
- * - no-dc-path: no resistive element in the circuit
- * - purely-reactive: circuit is purely reactive/diffusive without a DC path
- * - warburg-inductor-parallel: Warburg in parallel with inductor (non-physical)
- * - single-element-circuit: circuit consists of a single element
+ * Comprehensive circuit validator aligned with velo-spectroz-circuits.
  */
-export function validate(ast: CircuitNode): ValidationResult {
+export function validate(ast: CircuitNode, options?: ValidateOptions): ValidationResult {
   const issues: ValidationIssue[] = [];
 
-  // 1. Count elements — detect empty circuit
   let elementCount = 0;
   traverseNodes(ast, (node) => {
     if (node.type === 'element') elementCount++;
@@ -32,12 +24,11 @@ export function validate(ast: CircuitNode): ValidationResult {
     issues.push({
       type: 'error',
       kind: 'empty-circuit',
-      message: 'Circuit has no elements. Add at least one element (R, C, L, Q, W, Ws, Wo, G, Pdw).',
+      message: 'Circuit has no elements. Add at least one element (R, C, L, Q, W, Ws, Wo, G, Pdw, CC, HN).',
     });
-    return buildResult(issues);
+    return buildResult(issues, options);
   }
 
-  // 2. Single element warning
   if (elementCount === 1 && ast.type === 'element') {
     issues.push({
       type: 'warning',
@@ -46,22 +37,51 @@ export function validate(ast: CircuitNode): ValidationResult {
     });
   }
 
-  // 3. Structural validation (recursive)
   validateStructure(ast, issues, 'root');
-
-  // 4. Duplicate ID detection
   validateDuplicateIds(ast, issues);
-
-  // 5. Optional embedded parameter-vector validation
   validateElementParameters(ast, issues);
-
-  // 6. Physical validity: DC path check
   validateDcPath(ast, issues);
-
-  // 7. Physical validity: conflicting reactive elements
   validateConflictingReactive(ast, issues);
 
-  return buildResult(issues);
+  return buildResult(issues, options);
+}
+
+export function validateParameterValues(
+  ast: CircuitNode,
+  params: number[],
+  options?: ValidateOptions,
+): ValidationResult {
+  const registry = ElementRegistry.fromCircuit(ast);
+  const issues: ValidationIssue[] = [...validate(ast, options).issues];
+
+  if (params.length !== registry.totalParams()) {
+    issues.push({
+      type: 'error',
+      kind: 'parameter-count',
+      message: `Parameter count mismatch: expected ${registry.totalParams()}, found ${params.length}.`,
+    });
+    return buildResult(issues, options);
+  }
+
+  for (const entry of registry.entriesList()) {
+    const slice = params.slice(entry.paramOffset, entry.paramOffset + entry.nParams);
+    const reason = invalidParameterReason(entry.kind as string, slice);
+    if (reason) {
+      issues.push({
+        type: 'error',
+        kind: 'invalid-parameters',
+        message: `Invalid parameters for ${ELEMENT_KINDS.get(entry.kind)?.label ?? entry.kind} (${entry.kind}${entry.id}): ${reason}.`,
+        elementKind: entry.kind,
+        elementId: entry.id,
+      });
+    }
+  }
+
+  return buildResult(issues, options);
+}
+
+export function applyStrictMode(result: ValidationResult): ValidationResult {
+  return buildResult(result.issues, { strict: true });
 }
 
 function validateStructure(node: CircuitNode, issues: ValidationIssue[], path: string): void {
@@ -75,7 +95,6 @@ function validateStructure(node: CircuitNode, issues: ValidationIssue[], path: s
       });
       return;
     }
-
     for (let i = 0; i < node.children.length; i++) {
       validateStructure(node.children[i], issues, `${path}.series[${i}]`);
     }
@@ -91,7 +110,6 @@ function validateStructure(node: CircuitNode, issues: ValidationIssue[], path: s
       });
       return;
     }
-
     if (node.children.length === 1) {
       issues.push({
         type: 'error',
@@ -100,7 +118,6 @@ function validateStructure(node: CircuitNode, issues: ValidationIssue[], path: s
         path,
       });
     }
-
     for (let i = 0; i < node.children.length; i++) {
       validateStructure(node.children[i], issues, `${path}.parallel[${i}]`);
     }
@@ -136,37 +153,8 @@ function validateElementParameters(ast: CircuitNode, issues: ValidationIssue[]):
   });
 }
 
-function invalidParameterReason(kind: string, params: number[]): string | null {
-  if (params.some(value => !Number.isFinite(value))) return 'all parameters must be finite';
-
-  switch (kind) {
-    case 'R':
-      return params[0] > 0 ? null : 'R must be > 0';
-    case 'C':
-      return params[0] > 0 ? null : 'C must be > 0';
-    case 'L':
-      return params[0] > 0 ? null : 'L must be > 0';
-    case 'W':
-      return params[0] > 0 ? null : 'sigma must be > 0';
-    case 'Q':
-      return params[0] > 0 && params[1] > 0 && params[1] <= 1
-        ? null
-        : 'Q0 must be > 0 and 0 < n <= 1';
-    case 'Ws':
-    case 'Wo':
-    case 'G':
-      return params.every(value => value > 0) ? null : 'all element parameters must be > 0';
-    case 'Pdw':
-      return params[0] > 0 && params[1] > 0 && params[3] > 0 && params[2] > 0 && params[2] < 1
-        ? null
-        : 'D1,D2,Lambda must be > 0 and 0 < theta < 1';
-    default:
-      return null;
-  }
-}
-
 function validateDuplicateIds(ast: CircuitNode, issues: ValidationIssue[]): void {
-  const seen = new Map<string, { kind: string; id: number; count: number }>();
+  const seen = new Map<string, { count: number }>();
 
   traverseNodes(ast, (node) => {
     if (node.type !== 'element') return;
@@ -176,7 +164,6 @@ function validateDuplicateIds(ast: CircuitNode, issues: ValidationIssue[]): void
 
     if (existing) {
       existing.count++;
-      // Only report the first duplicate
       if (existing.count === 2) {
         issues.push({
           type: 'error',
@@ -187,7 +174,7 @@ function validateDuplicateIds(ast: CircuitNode, issues: ValidationIssue[]): void
         });
       }
     } else {
-      seen.set(key, { kind: node.kind, id: node.id, count: 1 });
+      seen.set(key, { count: 1 });
     }
   });
 }
@@ -200,7 +187,7 @@ function validateDcPath(ast: CircuitNode, issues: ValidationIssue[]): void {
     if (node.type !== 'element') return;
 
     const kind = node.kind as string;
-    if (kind === 'R' || kind === 'W' || kind === 'Ws' || kind === 'Wo') {
+    if (kind === 'R' || kind === 'W' || kind === 'Ws' || kind === 'Wo' || kind === 'CC' || kind === 'HN') {
       hasResistive = true;
     } else {
       hasReactive = true;
@@ -211,9 +198,8 @@ function validateDcPath(ast: CircuitNode, issues: ValidationIssue[]): void {
     issues.push({
       type: 'warning',
       kind: 'no-dc-path',
-      message: 'Circuit has no DC path (R, W, Ws, or Wo). This circuit may be unphysical at DC (ω→0).',
+      message: 'Circuit has no DC path (R, W, Ws, Wo, CC, or HN). This circuit may be unphysical at DC (ω→0).',
     });
-
     issues.push({
       type: 'warning',
       kind: 'purely-reactive',
@@ -223,15 +209,12 @@ function validateDcPath(ast: CircuitNode, issues: ValidationIssue[]): void {
 }
 
 function validateConflictingReactive(ast: CircuitNode, issues: ValidationIssue[]): void {
-  // Check for Warburg in parallel with inductor
   traverseNodes(ast, (node) => {
     if (node.type !== 'parallel') return;
 
     const kinds = new Set<string>();
     for (const child of node.children) {
-      if (child.type === 'element') {
-        kinds.add(child.kind as string);
-      }
+      if (child.type === 'element') kinds.add(child.kind as string);
     }
 
     const hasWarburg = kinds.has('W') || kinds.has('Ws') || kinds.has('Wo') || kinds.has('Pdw');
@@ -247,10 +230,20 @@ function validateConflictingReactive(ast: CircuitNode, issues: ValidationIssue[]
   });
 }
 
-function buildResult(issues: ValidationIssue[]): ValidationResult {
+function buildResult(issues: ValidationIssue[], options?: ValidateOptions): ValidationResult {
+  const finalIssues: ValidationIssue[] = options?.strict
+    ? issues.map(i =>
+      i.type === 'warning'
+        ? { type: 'error' as const, kind: 'invalid-parameters' as const, message: i.message, path: i.path, position: i.position }
+        : i,
+    )
+    : issues;
+
   return {
-    issues,
-    hasErrors: issues.some(i => i.type === 'error'),
-    hasWarnings: issues.some(i => i.type === 'warning'),
+    issues: finalIssues,
+    hasErrors: finalIssues.some(i => i.type === 'error'),
+    hasWarnings: finalIssues.some(i => i.type === 'warning'),
   };
 }
+
+export { invalidParameterReason } from './physical.js';
