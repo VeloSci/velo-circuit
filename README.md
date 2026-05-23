@@ -14,6 +14,24 @@ Framework-agnostic SVG circuit editor for Boukamp DSL circuits used in electroch
 - Full parity with `velo-spectroz` circuit elements (11 types including `CC`, `HN`)
 - Designed to integrate with scientific tooling such as `velo-spectroz`
 
+## Element types (11)
+
+Circuit symbols use the [outline symbol design system](./docs/reference/symbol-design-system.md): outline-only glyphs, **2.0 px** base stroke, and per-kind stroke colors. Parameter counts and DSL syntax are documented in [Element Types](./docs/reference/element-types.md).
+
+| Code | Element | Params |
+|------|---------|--------|
+| [`R`](./docs/reference/element-types.md#resistor-r) | Resistor | 1 |
+| [`C`](./docs/reference/element-types.md#capacitor-c) | Capacitor | 1 |
+| [`L`](./docs/reference/element-types.md#inductor-l) | Inductor | 1 |
+| [`Q`](./docs/reference/element-types.md#cpe-q) | CPE | 2 |
+| [`W`](./docs/reference/element-types.md#warburg-infinite-w) | Warburg Infinite | 1 |
+| [`Ws`](./docs/reference/element-types.md#warburg-short-ws) | Warburg Short | 2 |
+| [`Wo`](./docs/reference/element-types.md#warburg-open-wo) | Warburg Open | 2 |
+| [`G`](./docs/reference/element-types.md#gerischer-g) | Gerischer | 2 |
+| [`Pdw`](./docs/reference/element-types.md#parallel-diffusion-warburg-pdw) | Parallel Diffusion Warburg | 4 |
+| [`CC`](./docs/reference/element-types.md#cole-cole-cc) | Cole-Cole | 3 |
+| [`HN`](./docs/reference/element-types.md#havriliak-negami-hn) | Havriliak-Negami | 4 |
+
 ## Install
 
 ```bash

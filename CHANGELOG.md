@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] — 2026-05-23
+
+### Added
+
+- Element kinds `G`, `Pdw`, `CC`, `HN` — full **11/11** parity with `velo-spectroz`
+- [Symbol design system](./docs/reference/symbol-design-system.md) and complete [element types](./docs/reference/element-types.md) reference
+
+### Changed
+
+- **Symbol homogenization:** all element glyphs use the outline-only family (`fill="none"`)
+- **Unified stroke:** base `theme.strokeWidth` **2.0** with documented multipliers (plates 1.25×, Warburg diagonals 1.15×, etc.)
+- **Per-kind colors:** `--ce-{kind}-stroke` on `.circuit-node[data-kind="…"]`
+- **Grid:** world-space infinite grid alignment and rendering fixes
+- Editor palette and validation messages cover all 11 kinds
+
 ## [0.1.0] — 2026-04-26
 
 ### Added
