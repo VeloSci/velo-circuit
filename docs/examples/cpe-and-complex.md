@@ -14,6 +14,8 @@ editor.setValue('R0-p(R1,C1)-Wo2')
 editor.setValue('R0-p(R1,Q1)-Wo2')
 ```
 
+<CircuitSvgPreview dsl="R0-p(R1,Q1)-Wo2" caption="Randles with CPE and Warburg open" />
+
 ## CPE Parameters
 
 CPE has two parameters:
@@ -45,6 +47,8 @@ editor.setValue('R0-p(R1,Q1)')
 // Multi-element model with CPE and Warburg
 editor.setValue('R0-p(R1,Q1)-p(R2,C2)-Wo3')
 ```
+
+<CircuitSvgPreview dsl="R0-p(R1,Q1)-p(R2,C2)-Wo3" maxWidth="520px" />
 
 ## Validation Rules
 

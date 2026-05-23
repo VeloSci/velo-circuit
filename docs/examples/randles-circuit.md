@@ -8,13 +8,7 @@ The Randles circuit is one of the most common equivalent circuit models in EIS. 
 R0-p(R1,C1)
 ```
 
-## Structure
-
-```
-        ┌──[ C1 ]──┐
-[ R0 ]──┤          ├──
-        └──[ R1 ]──┘
-```
+<CircuitSvgPreview dsl="R0-p(R1,C1)" />
 
 ## Why Parallel Matters
 
@@ -58,6 +52,8 @@ Extend the Randles model with a Warburg element to model diffusion:
 editor.setValue('R0-p(R1,C1)-Wo2')
 ```
 
+<CircuitSvgPreview dsl="R0-p(R1,C1)-Wo2" caption="Randles + Warburg open (Wo)" />
+
 This adds a finite-length Warburg open element in series with the Randles branch, modeling semi-infinite diffusion.
 
 ## Using CPE Instead of Capacitor
@@ -67,6 +63,8 @@ Replace the ideal capacitor with a CPE for more realistic modeling:
 ```ts
 editor.setValue('R0-p(R1,Q1)-Wo2')
 ```
+
+<CircuitSvgPreview dsl="R0-p(R1,Q1)-Wo2" caption="Randles with CPE and Warburg open" />
 
 The CPE element `Q` models non-ideal capacitive behavior with a fractional exponent `n`.
 

@@ -23,6 +23,8 @@ Pdw0{1e-8,1e-9,0.5,1e-3}
 R0-p(Q1,R2-Pdw3)
 ```
 
+<CircuitSvgPreview dsl="R0-p(Q1,R2-Pdw3{1e-8,1e-9,0.5,1e-3})" maxWidth="480px" />
+
 Series solution resistance, then a parallel branch: CPE in parallel with (resistor in series with PDW).
 
 ```ts

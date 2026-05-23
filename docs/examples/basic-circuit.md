@@ -8,6 +8,18 @@ Build a simple series circuit with a resistor and capacitor.
 R0-C1
 ```
 
+<CircuitSvgPreview dsl="R0-C1" />
+
+### Wire styles
+
+Previews default to **curved wires** (same as the editor). Use `wires="orthogonal"` for right-angle routing. A parallel branch makes the difference clear:
+
+<CircuitSvgPreview dsl="R0-p(R1,C1)" caption="Curved wires" />
+
+<CircuitSvgPreview dsl="R0-p(R1,C1)" wires="orthogonal" caption="Orthogonal wires" />
+
+For a single stroke color that follows the theme, add `colorMode="bicolor"`.
+
 ## Live Example
 
 ```ts
@@ -27,12 +39,6 @@ editor.on('ast-changed', () => {
 })
 ```
 
-## What This Produces
-
-```
-[ R0 ]—[ C1 ]
-```
-
 ## Adding More Elements
 
 Append elements with `-` (series) or use `insertElement()`:
@@ -40,7 +46,6 @@ Append elements with `-` (series) or use `insertElement()`:
 ```ts
 // Manual DSL editing
 editor.setValue('R0-C1-L2')
-// [ R0 ]—[ C1 ]—[ L2 ]
 
 // Programmatic insertion with auto-ID
 editor.insertElement('L', 'series')
@@ -51,11 +56,7 @@ editor.insertElement('L', 'series')
 
 The layout engine places elements horizontally in series:
 
-```
-┌──────────────────────────────────────────┐
-│           [R0]────[C1]────[L2]           │
-└──────────────────────────────────────────┘
-```
+<CircuitSvgPreview dsl="R0-C1-L2" />
 
 ## Programmatic Inspection
 

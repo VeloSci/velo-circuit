@@ -10,6 +10,8 @@ G0{1e-3,0.1}
 
 Embedded values are `Y₀` (admittance scale, S·s½) and `K` (reaction rate, s⁻¹).
 
+<CircuitSvgPreview dsl="G0{1e-3,0.1}" />
+
 ## Example circuit
 
 ```text
@@ -17,6 +19,8 @@ R0-p(R1,C1)-G2{1e-3,0.05}
 ```
 
 Solution resistance in series with a Randles branch and a Gerischer diffusion–reaction path.
+
+<CircuitSvgPreview dsl="R0-p(R1,C1)-G2{1e-3,0.05}" maxWidth="480px" />
 
 ```ts
 import { createEditor } from 'velo-circuit-editor'

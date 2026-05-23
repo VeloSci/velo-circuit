@@ -12,6 +12,8 @@ CC1{50,1e-3,0.8}
 
 Symbol: single dispersion arc with **α** annotation (outline).
 
+<CircuitSvgPreview dsl="CC1{50,1e-3,0.8}" />
+
 ## Havriliak-Negami (`HN`)
 
 Four parameters: `R`, `τ`, `α` (asymmetric broadening), `β` (symmetric broadening).
@@ -22,11 +24,15 @@ HN1{50,1e-3,0.8,0.9}
 
 Symbol: dual arcs with **α,β** label.
 
+<CircuitSvgPreview dsl="HN1{50,1e-3,0.8,0.9}" />
+
 ## Series example
 
 ```text
 R0-CC1{100,1e-4,0.75}-HN2{100,1e-4,0.8,0.85}
 ```
+
+<CircuitSvgPreview dsl="R0-CC1{100,1e-4,0.75}-HN2{100,1e-4,0.8,0.85}" maxWidth="520px" />
 
 ```ts
 editor.setValue('CC1{50,1e-3,0.8}')

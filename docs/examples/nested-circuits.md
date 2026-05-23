@@ -10,16 +10,11 @@ A parallel branch inside a parallel:
 p(R0,p(C1,Q2))
 ```
 
-Structure:
-```
-        ┌──[ C1 ]──┐
-        │           │
-[ R0 ]──┤           ├──
-        │           │
-        └──[ Q2 ]──┘
-```
+<CircuitSvgPreview dsl="p(R0,p(C1,Q2))" />
 
 ## Double Nesting
+
+<CircuitSvgPreview dsl="p(R0,p(C1,p(Q2,Wo3)))" />
 
 ```ts
 editor.setValue('p(R0,p(C1,p(Q2,Wo3)))')
@@ -28,6 +23,8 @@ editor.setValue('p(R0,p(C1,p(Q2,Wo3)))')
 ## Series Inside Parallel
 
 Use series elements within parallel branches:
+
+<CircuitSvgPreview dsl="R0-p(R1,C1)" />
 
 ```ts
 editor.setValue('R0-p(R1,C1)')
@@ -67,6 +64,8 @@ Modeling a multi-layer electrochemical cell:
 ```
 R0-p(R1,C1)-p(R2,Q2)
 ```
+
+<CircuitSvgPreview dsl="R0-p(R1,C1)-p(R2,Q2)" />
 
 ## Next
 
