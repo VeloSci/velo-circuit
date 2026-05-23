@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { defaultMountHeight } from './playground-utils';
 
 const props = defineProps<{
   initialDsl?: string;
+  showParams?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -10,60 +12,53 @@ const emit = defineEmits<{
 }>();
 
 const containerRef = ref<HTMLDivElement | null>(null);
-let root: any = null;
+let editor: import('/src/adapters/react/index.js').ReactEditorInstance | null = null;
 
 onMounted(async () => {
   if (!containerRef.value) return;
 
-  const [React, ReactDOM, adapter] = await Promise.all([
-    import('react'),
-    import('react-dom/client'),
-    import('/src/adapters/react/index.js'),
-  ]);
+  const adapter = await import('/src/adapters/react/index.js');
 
-  root = ReactDOM.createRoot(containerRef.value);
+  editor = adapter.createReactCircuitEditor(containerRef.value, {
+    initialDsl: props.initialDsl,
+    height: defaultMountHeight,
+    width: containerRef.value.clientWidth || 900,
+    onChange: (dsl) => emit('dslChange', dsl),
+  });
 
-  const App = () => {
-    const [val, setVal] = React.useState(props.initialDsl || 'R0');
-
-    const { containerRef: editorRef } = adapter.useCircuitEditor({
-      value: val,
-      onDslChange: (newDsl: string) => {
-        setVal(newDsl);
-        emit('dslChange', newDsl);
-      }
-    });
-
-    return React.createElement('div', {
-      ref: editorRef,
-      style: { height: '100%', width: '100%' }
-    });
-  };
-
-  root.render(React.createElement(App));
+  if (props.showParams) {
+    editor.setShowParams(true);
+  }
 });
 
 onBeforeUnmount(() => {
-  root?.unmount();
+  editor?.destroy();
 });
 
 defineExpose({
-  setValue(_dsl: string) {
-    // React state managed internally
+  setValue(dsl: string) {
+    editor?.setValue(dsl);
   },
   centerView() {
-    // Not implemented
-  }
+    editor?.fitView();
+  },
+  setShowParams(show: boolean) {
+    editor?.setShowParams(show);
+  },
+  setStrict(strict: boolean) {
+    editor?.setStrict(strict);
+  },
 });
 </script>
 
 <template>
-  <div ref="containerRef" class="preview-container"></div>
+  <div ref="containerRef" class="preview-container ce-editor"></div>
 </template>
 
 <style scoped>
 .preview-container {
   width: 100%;
   height: 100%;
+  min-height: 320px;
 }
 </style>

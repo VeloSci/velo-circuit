@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useData } from 'vitepress';
 import type { CircuitExample } from '../theme/circuits';
-import { sampleCircuits } from '../theme/circuits';
+import { allPlaygroundCircuits } from '../theme/circuits';
 import VanillaPreview from './VanillaPreview.vue';
 import ReactPreview from './ReactPreview.vue';
 import VuePreview from './VuePreview.vue';
@@ -27,8 +27,11 @@ const diagnosticsOutput = ref<{ type: string; message: string }[]>([]);
 const activeTab = ref('preview');
 const framework = ref('react');
 const activePreviewRef = ref<any>(null);
+const showParams = ref(false);
+const strictMode = ref(false);
+const mountPointRef = ref<HTMLElement | null>(null);
 
-const circuitsList = computed(() => props.circuits || sampleCircuits);
+const circuitsList = computed(() => props.circuits || allPlaygroundCircuits);
 
 // Map tabs to preview components
 const previewComponents: Record<string, any> = {
@@ -101,17 +104,28 @@ async function loadCore() {
   return coreModule;
 }
 
+function toggleShowParams() {
+  showParams.value = !showParams.value;
+  activePreviewRef.value?.setShowParams?.(showParams.value);
+}
+
+function toggleStrict() {
+  strictMode.value = !strictMode.value;
+  activePreviewRef.value?.setStrict?.(strictMode.value);
+  updateDiagnostics();
+}
+
 async function updateDiagnostics() {
   const core = await loadCore();
   const { validate, parseBoukamp } = core;
 
   const result = parseBoukamp(dslInput.value);
-  if (result && 'type' in result && (result.type === 'lex' || result.type === 'parse')) {
+  if (result && typeof result === 'object' && 'type' in result && (result.type === 'lex' || result.type === 'parse')) {
     diagnosticsOutput.value = [{ type: 'error', message: result.message }];
     return;
   }
 
-  const validation = validate(result);
+  const validation = validate(result, { strict: strictMode.value });
   diagnosticsOutput.value = validation.issues.map((i: any) => ({
     type: i.type,
     message: i.message,
@@ -128,10 +142,10 @@ function copyDsl() {
 }
 
 function copySvg() {
-  // Get SVG from the current preview's container
-  const svgEl = document.querySelector('.framework-mount-point svg');
-  if (svgEl) {
-    navigator.clipboard.writeText(svgEl.outerHTML).catch(() => {});
+  const root = mountPointRef.value ?? document.querySelector('.framework-mount-point');
+  const svg = root?.querySelector('svg.circuit-editor-root, svg.circuit-editor');
+  if (svg) {
+    navigator.clipboard.writeText(svg.outerHTML).catch(() => {});
   }
 }
 
@@ -195,7 +209,9 @@ onMounted(async () => {
           {{ circuit.title }}
         </button>
         <div style="flex: 1"></div>
-        <button class="circuit-btn" @click="centerView" title="Center View">🎯 Center</button>
+        <button class="circuit-btn" @click="centerView" title="Fit view (SVG)">🎯 Fit</button>
+        <button class="circuit-btn" :class="{ active: showParams }" @click="toggleShowParams">Params</button>
+        <button class="circuit-btn" :class="{ active: strictMode }" @click="toggleStrict">Strict</button>
       </div>
     </div>
 
@@ -249,11 +265,12 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="framework-mount-point" :style="{ height }">
+        <div ref="mountPointRef" class="framework-mount-point">
           <component
             :is="currentPreview"
             ref="activePreviewRef"
             :initial-dsl="dslInput"
+            :show-params="showParams"
             @dsl-change="onPreviewDslChange"
           />
         </div>
@@ -448,9 +465,15 @@ onMounted(async () => {
   width: 100%;
   background: #f0f2f5;
   flex: 1;
-  min-height: 0;
+  min-height: 360px;
+  position: relative;
 }
 .dark .framework-mount-point { background: #0f172a; }
+
+.framework-mount-point :deep(svg.circuit-editor-root),
+.framework-mount-point :deep(.ce-editor) {
+  height: 100%;
+}
 
 .code-view {
   padding: 16px;
