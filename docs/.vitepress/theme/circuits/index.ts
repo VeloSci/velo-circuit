@@ -1,3 +1,14 @@
+import {
+  parameterizedRandles,
+  cpeParameterized,
+  coleColeCircuit,
+  hnCircuit,
+  gridCatalogRows,
+} from './grid-catalog.js';
+
+export { parameterizedRandles, cpeParameterized, coleColeCircuit, hnCircuit, gridCatalogRows } from './grid-catalog.js';
+export type { GridCatalogRow } from './grid-catalog.js';
+
 export interface CircuitExample {
   id: string;
   title: string;
@@ -70,6 +81,18 @@ export const sampleCircuits: CircuitExample[] = [
   cpeCircuit,
   fullRandlesCircuit,
   multiWarburgCircuit,
+];
+
+export const parameterizedCircuits: CircuitExample[] = [
+  parameterizedRandles,
+  cpeParameterized,
+  coleColeCircuit,
+  hnCircuit,
+];
+
+export const allPlaygroundCircuits: CircuitExample[] = [
+  ...sampleCircuits,
+  ...parameterizedCircuits,
 ];
 
 export interface PlaygroundConfig {
