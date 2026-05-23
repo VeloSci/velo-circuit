@@ -21,6 +21,10 @@
     "editor",
     "typescript"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "exports": {
     ".": {
       "import": "./dist/core/index.js",

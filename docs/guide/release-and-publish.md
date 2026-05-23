@@ -61,3 +61,29 @@ pnpm docs:preview  # preview production build
 ```
 
 Live site: [jigonzalez930209.github.io/velo-circuit](https://jigonzalez930209.github.io/velo-circuit/)
+
+## Troubleshooting npm publish (E404)
+
+If CI fails with:
+
+```text
+npm error 404 Not Found - PUT https://registry.npmjs.org/velo-circuit
+```
+
+the package **exists** on npm (maintainer: `jigonzalez930209`), but the `NPM_TOKEN` secret is invalid, expired, or belongs to a different account.
+
+Fix:
+
+1. Log in to [npmjs.com](https://www.npmjs.com/) as **jigonzalez930209**
+2. Create a new **Granular Access Token** (or classic token) with **Read and Write** publish permission for `velo-circuit`
+3. Update the GitHub secret: repo **Settings → Secrets and variables → Actions → NPM_TOKEN**
+4. Re-run the failed **Publish to npm** workflow from the Actions tab (or push the tag again)
+
+The workflow now runs `npm whoami` before publish so auth failures show a clear error instead of a misleading 404.
+
+Manual publish (if logged in locally as the package owner):
+
+```bash
+pnpm build
+npm publish --access public
+```
