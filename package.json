@@ -1,6 +1,6 @@
 {
   "name": "velo-circuit",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Framework-agnostic SVG circuit editor based on the Boukamp DSL",
   "license": "MIT",
   "type": "module",
