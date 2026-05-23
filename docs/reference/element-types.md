@@ -1,167 +1,105 @@
 # Element Types Reference
 
+Eleven Boukamp element kinds share homogenized **outline** SVG symbols (80×40 viewBox, 2.0 px base stroke). Geometry and stroke multipliers are defined in the [Symbol Design System](/reference/symbol-design-system).
+
+<SymbolGallery />
+
 ## Resistor (`R`)
 
-Resists the flow of charge. Models Ohmic resistance.
-
-```
-R0        → [R0]        → 80Ω typical
-```
-
-- **Parameters:** 1
-- **Unit:** Ohm (Ω)
-- **DSL code:** `R`
+- **Parameters:** `R` — R — resistance (Ω)
+- **DSL:** `R0`, `R0{50}`
 
 ## Capacitor (`C`)
 
-Stores charge electrostatically. Models double-layer capacitance.
-
-```
-C1        → [ C1 ]
-            ───    ───
-```
-
-- **Parameters:** 1
-- **Unit:** Farad (F)
-- **DSL code:** `C`
+- **Parameters:** `C` — C — capacitance (F)
+- **DSL:** `C1`, `C1{1e-6}`
 
 ## Inductor (`L`)
 
-Stores energy in a magnetic field. Models inductive behavior.
-
-```
-L2        → ( L2 )
-            ~~~~
-```
-
-- **Parameters:** 1
-- **Unit:** Henry (H)
-- **DSL code:** `L`
+- **Parameters:** `L` — L — inductance (H)
+- **DSL:** `L2`
 
 ## CPE (`Q`)
 
-Constant Phase Element. Models non-ideal capacitance.
-
-```
-Q0        → [ Q0 ]
-            ───/\/\──
-```
-
-- **Parameters:** 2
-- **Units:** Q₀ (S·sⁿ), n (dimensionless)
-- **DSL code:** `Q`
+- **Parameters:** `Q₀` — Q₀ — CPE magnitude (S·sⁿ); `n` — n — CPE exponent
+- **DSL:** `Q0{5e-5,0.8}`
 - **Range:** 0 < n ≤ 1
 
-## Warburg Infinite (`W`)
+## Warburg (infinite) (`W`)
 
-Semi-infinite linear diffusion. Phase angle = 45°.
+Semi-infinite linear diffusion (45° Nyquist line). Shared Warburg diagonal with Ws/Wo; no end cap.
 
-```
-W2        → [ W2 ]
-            ~~~~/\/\/\/~~
-```
+- **Parameters:** `σ` — σ — Warburg coefficient (Ω·s⁻½)
+- **DSL:** `W2`, `W2{120}`
 
-- **Parameters:** 1
-- **Unit:** σ (Ω·s⁻½)
-- **DSL code:** `W`
+## Warburg (short) (`Ws`)
 
-## Warburg Short (`Ws`)
+Finite diffusion layer, transmissive boundary. Same diagonal as `W` plus closing vertical bar at the diffusion end.
 
-Finite diffusion layer, transmissive boundary.
+- **Parameters:** `Y₀` — Y₀ — admittance scale (S·s½); `B` — B — time scale (s½)
+- **DSL:** `Ws0{1e-3,10}`
 
-```
-Ws0       → [Ws0]
-           ~~~~/\/~~
-```
+## Warburg (open) (`Wo`)
 
-- **Parameters:** 2
-- **Units:** Y₀ (S·s½), B (s½)
-- **DSL code:** `Ws`
+Finite diffusion layer, reflecting boundary. Shared diagonal with paired open bars at the end.
 
-## Warburg Open (`Wo`)
-
-Finite diffusion layer, reflecting boundary.
-
-```
-Wo1       → [Wo1]
-           ~~/\/\/~~
-```
-
-- **Parameters:** 2
-- **Units:** Y₀ (S·s½), B (s½)
-- **DSL code:** `Wo`
+- **Parameters:** `Y₀`, `B` (same labels as Ws)
+- **DSL:** `Wo1{1e-3,10}`
 
 ## Gerischer (`G`)
 
-Diffusion-reaction impedance with a finite reaction rate.
+Diffusion–reaction impedance. Warburg-like diagonal plus reaction hook.
 
-```
-G0        → [ G0 ]
-            reaction + diffusion
-```
-
-- **Parameters:** 2
-- **Units:** Y₀ (S·s½), K (s⁻¹)
-- **DSL code:** `G`
+- **Parameters:** `Y₀` — Y₀ — admittance scale (S·s½); `K` — K — reaction rate (s⁻¹)
+- **DSL:** `G0{1e-3,0.1}`
 
 ## Parallel Diffusion Warburg (`Pdw`)
 
-Two parallel solid-state diffusion paths with a weighting factor. This matches the PDW element used by `velo-spectroz` literature reproduction.
+Two parallel solid-state diffusion paths (literature PDW element).
 
-```
-Pdw0      → [Pdw0]
-            diffusion path 1 ∥ diffusion path 2
-```
-
-- **Parameters:** 4
-- **Units:** D1 (cm²/s), D2 (cm²/s), theta (dimensionless), Lambda (mol/cm³)
-- **DSL code:** `Pdw`
+- **Parameters:** `D1` — D1 — diffusion coefficient (cm²/s); `D2` — D2 — diffusion coefficient (cm²/s); `θ` — θ — branch fraction; `Λ` — Λ — molar concentration (mol/cm³)
+- **DSL:** `Pdw0{1e-8,1e-9,0.5,1e-3}`
 
 ## Cole-Cole (`CC`)
 
-Dispersion relaxation element. Matches `velo-spectroz-circuits` Cole-Cole impedance.
+Dispersion relaxation (matches velo-spectroz Cole-Cole impedance).
 
-```
-CC1{50,1e-3,0.8}
-```
-
-- **Parameters:** 3 — R (Ω), τ (s), α
-- **DSL code:** `CC`
-- **Range:** R,τ > 0; 0.3 ≤ α ≤ 1.0
+- **Parameters:** `R` — R — resistance (Ω); `τ` — τ — relaxation time (s); `α` — α — dispersion exponent
+- **DSL:** `CC1{50,1e-3,0.8}`
+- **Range:** R, τ > 0; 0.3 ≤ α ≤ 1.0
 
 ## Havriliak-Negami (`HN`)
 
 Generalized dispersion with dual exponents.
 
-```
-HN1{50,1e-3,0.8,0.9}
-```
-
-- **Parameters:** 4 — R (Ω), τ (s), α, β
-- **DSL code:** `HN`
-- **Range:** R,τ > 0; 0.3 ≤ α ≤ 1.0; 0 ≤ β ≤ 1.0
+- **Parameters:** `R`, `τ`, `α` — α — asymmetric broadening exponent; `β` — β — symmetric broadening exponent
+- **DSL:** `HN1{50,1e-3,0.8,0.9}`
+- **Range:** R, τ > 0; 0.3 ≤ α ≤ 1.0; 0 ≤ β ≤ 1.0
 
 ## Parameter embedding
 
-Parameters can be embedded in the linear DSL using braces (canonical) or brackets (alias):
+Embed numeric values after the element id with braces (canonical) or brackets (alias):
 
-```
+```text
 R0{50}-Q1{5e-5,0.8}
+CC1{50,1e-3,0.8}
 R0[50]              # alias
 ```
 
-## ELEMENT_KINDS Table
+## ELEMENT_KINDS summary
 
-| Code | Label | Parameters |
-|------|-------|------------|
-| `R` | Resistor | 1 |
-| `C` | Capacitor | 1 |
-| `L` | Inductor | 1 |
-| `Q` | CPE | 2 |
-| `W` | Warburg Infinite | 1 |
-| `Ws` | Warburg Short | 2 |
-| `Wo` | Warburg Open | 2 |
-| `G` | Gerischer | 2 |
-| `Pdw` | Parallel Diffusion Warburg | 4 |
-| `CC` | Cole-Cole | 3 |
-| `HN` | Havriliak-Negami | 4 |
+| Code | Label | Params | Short labels |
+|------|-------|--------|--------------|
+| `R` | Resistor | 1 | R |
+| `C` | Capacitor | 1 | C |
+| `L` | Inductor | 1 | L |
+| `Q` | CPE | 2 | Q₀, n |
+| `W` | Warburg (infinite) | 1 | σ |
+| `Ws` | Warburg (short) | 2 | Y₀, B |
+| `Wo` | Warburg (open) | 2 | Y₀, B |
+| `G` | Gerischer | 2 | Y₀, K |
+| `Pdw` | Parallel Diffusion Warburg | 4 | D1, D2, θ, Λ |
+| `CC` | Cole-Cole | 3 | R, τ, α |
+| `HN` | Havriliak-Negami | 4 | R, τ, α, β |
+
+Metadata source: [`src/core/domain/circuit.ts`](../../src/core/domain/circuit.ts).
