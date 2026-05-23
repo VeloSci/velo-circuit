@@ -55,8 +55,25 @@ Embed CSS into the SVG string for standalone export:
 ```ts
 import { exportSvgWithStyles } from 'velo-circuit-editor'
 
-const standalone = exportSvgWithStyles(svg, DARK_THEME)
+const standalone = exportSvgWithStyles(svg, DARK_THEME, {
+  colorMode: 'multicolor', // or 'bicolor'
+  themeMode: 'dark',
+})
 // Contains <style>...</style> inside the SVG
+```
+
+## renderDslPreviewSvg
+
+One-shot helper for docs and thumbnails — parses DSL, renders SVG, and embeds theme CSS:
+
+```ts
+import { renderDslPreviewSvg } from 'velo-circuit-editor'
+
+const svg = renderDslPreviewSvg('R0-p(R1,C1)', {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved', // default — use 'orthogonal' for right-angle wires
+})
 ```
 
 ## Viewport Controller
