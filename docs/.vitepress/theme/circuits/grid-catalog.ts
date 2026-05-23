@@ -40,12 +40,15 @@ export interface GridCatalogRow {
 
 export const gridCatalogRows: GridCatalogRow[] = [
   { id: 'g1', label: 'Basic RC', dsl: 'R0{100}-C1{1e-5}' },
-  { id: 'g2', label: 'Randles', dsl: 'R0{10}-p(R1{100},C1{1e-5})-Wo2{0.05,0.1}' },
-  { id: 'g3', label: 'CPE branch', dsl: 'R0{50}-p(R1{200},Q1{5e-5,0.82})' },
-  { id: 'g4', label: 'Nested', dsl: 'R0-p(R1,p(R2{50},C1{1e-6}))' },
-  { id: 'g5', label: 'Cole-Cole', dsl: 'R0{50}-CC1{50,1e-3,0.8}' },
-  { id: 'g6', label: 'HN', dsl: 'R0{10}-HN1{50,1e-3,0.8,0.9}' },
-  { id: 'g7', label: 'Gerischer', dsl: 'R0{20}-G1{0.01,0.5}' },
-  { id: 'g8', label: 'PDW', dsl: 'R0{10}-Pdw1{1e-10,1e-11,0.6,4.2e-4}' },
-  { id: 'g9', label: 'Invalid (strict)', dsl: 'R0{-5}-C1{1e-5}' },
+  { id: 'g2', label: 'RL series', dsl: 'R0{10}-L1{1e-3}' },
+  { id: 'g3', label: 'Warburg (W)', dsl: 'R0{10}-W1{0.05}' },
+  { id: 'g4', label: 'Warburg short (Ws)', dsl: 'R0{10}-Ws1{0.01,0.5}' },
+  { id: 'g5', label: 'Randles', dsl: 'R0{10}-p(R1{100},C1{1e-5})-Wo2{0.05,0.1}' },
+  { id: 'g6', label: 'CPE branch', dsl: 'R0{50}-p(R1{200},Q1{5e-5,0.82})' },
+  { id: 'g7', label: 'Nested', dsl: 'R0-p(R1,p(R2{50},C1{1e-6}))' },
+  { id: 'g8', label: 'Cole-Cole', dsl: 'R0{50}-CC1{50,1e-3,0.8}' },
+  { id: 'g9', label: 'HN', dsl: 'R0{10}-HN1{50,1e-3,0.8,0.9}' },
+  { id: 'g10', label: 'Gerischer', dsl: 'R0{20}-G1{0.01,0.5}' },
+  { id: 'g11', label: 'PDW', dsl: 'R0{10}-Pdw1{1e-10,1e-11,0.6,4.2e-4}' },
+  { id: 'g12', label: 'Invalid (strict)', dsl: 'R0{-5}-C1{1e-5}' },
 ];
