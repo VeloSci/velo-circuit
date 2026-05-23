@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] — 2026-05-23
+
+### Added
+
+- **Static SVG preview API:** `renderDslPreviewSvg()`, `exportPreviewSvgWithStyles()`, and `preview` mode on `renderDslToSvg` / `renderCircuitEx` for docs, thumbnails, and read-only diagrams
+- **`connectionStyle`:** curved wires by default; `orthogonal` option for schematic-style routing
+- **`SymbolColorMode`:** `bicolor` and `multicolor` theme CSS via `buildPreviewThemeCSS()` and per-kind stroke colors
+- **`getJunctionHub()`** exported from the public API — junction dots align with wire convergence ports
+- [Static SVG Rendering](./docs/guide/static-rendering.md) guide, [Adapters overview](./docs/adapters/index.md), and SVG previews in all [examples](./docs/examples/)
+- [Migration guide](./docs/guide/migration-v1.md) for upgrading from 0.x
+- npm package metadata: `repository`, `homepage`, `bugs`, `keywords`, optional framework `peerDependencies`
+
+### Changed
+
+- Documentation overhaul: API, guides, adapters, and reference aligned with `velo-circuit` package name
+- **203 tests** covering parser, layout, renderer, preview mode, grid, editor, and all 11 element kinds
+
+### Fixed
+
+- Junction hub dots no longer render at the geometric center of junction boxes — they align with curved and orthogonal wire ports
+
 ## [0.4.0] — 2026-05-23
 
 ### Added

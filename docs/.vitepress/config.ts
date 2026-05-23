@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   base: '/velo-circuit/',
-  title: 'Velo Circuit Editor',
+  title: 'velo-circuit',
   description: 'Framework-agnostic SVG circuit editor based on the Boukamp DSL',
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
@@ -37,6 +37,7 @@ export default defineConfig({
           { text: 'Architecture', link: '/guide/architecture' },
           { text: 'Core Concepts', link: '/guide/core-concepts' },
           { text: 'Boukamp DSL', link: '/guide/boukamp-dsl' },
+          { text: 'Migration to v1.0', link: '/guide/migration-v1' },
           { text: 'Release and Publish', link: '/guide/release-and-publish' },
         ]},
       ],
@@ -88,7 +89,7 @@ export default defineConfig({
       ],
     },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/velo-circuit/velo-circuit' },
+      { icon: 'github', link: 'https://github.com/jigonzalez930209/velo-circuit' },
     ],
     search: {
       provider: 'local',

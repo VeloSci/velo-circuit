@@ -4,6 +4,23 @@
   "description": "Framework-agnostic SVG circuit editor based on the Boukamp DSL",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jigonzalez930209/velo-circuit.git"
+  },
+  "homepage": "https://jigonzalez930209.github.io/velo-circuit/",
+  "bugs": {
+    "url": "https://github.com/jigonzalez930209/velo-circuit/issues"
+  },
+  "keywords": [
+    "circuit",
+    "svg",
+    "boukamp",
+    "eis",
+    "impedance",
+    "editor",
+    "typescript"
+  ],
   "exports": {
     ".": {
       "import": "./dist/core/index.js",
@@ -48,13 +65,35 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "pnpm build",
     "lint": "tsc --noEmit && echo \"ok\"",
     "release:prepare": "node ./scripts/release.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "vue": ">=3.5",
+    "svelte": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.1",
     "@vitest/coverage-v8": "^4.1.5",
@@ -66,8 +105,5 @@
     "vitepress": "^1.6.3",
     "vitest": "^2.1.9",
     "vue": "^3.5.13"
-  },
-  "dependencies": {
-    "@types/node": "^25.6.0"
   }
 }

@@ -64,7 +64,7 @@ resetNodeIdCounter()
 
 ## Junction hubs
 
-Parallel branches insert empty junction nodes. Dots are rendered at the port where wires converge:
+Parallel branches insert empty junction nodes. Dots are rendered at the port where wires converge. The helper lives in `domain/graph.ts` and is exported from the package root:
 
 ```ts
 import { getJunctionHub } from 'velo-circuit'

@@ -2,12 +2,15 @@
 
 Framework-agnostic SVG circuit editor for Boukamp DSL circuits used in electrochemical impedance spectroscopy (EIS).
 
+**Documentation:** [jigonzalez930209.github.io/velo-circuit](https://jigonzalez930209.github.io/velo-circuit/)
+
 ## Why velo-circuit
 
 - Unified circuit model from DSL parsing to rendered SVG output
 - Pure TypeScript core with no runtime UI framework dependency
 - Official adapters for React, Vue, Svelte, Angular, Astro and Vanilla
 - Built-in editor interactions: zoom, pan, drag, diagnostics, undo/redo
+- **Static SVG preview** for docs and thumbnails — no editor chrome required
 - Parameterized DSL: `R0{50}-Q1{5e-5,0.8}` with strict validation mode
 - SVG-first canvas with world-space infinite grid
 - `createCircuitGrid()` catalog view (DSL + SVG columns) and editor grid mode
@@ -86,6 +89,23 @@ grid.mount(document.getElementById('grid')!);
 grid.on('row-double-click', (row) => console.log(row));
 ```
 
+## Static SVG preview
+
+Render read-only circuit diagrams without mounting the editor:
+
+```ts
+import { renderDslPreviewSvg } from 'velo-circuit';
+
+const svg = renderDslPreviewSvg('R0-p(R1,C1)-Wo2', {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+});
+// → standalone <svg class="circuit-preview">…</svg> with embedded CSS
+```
+
+See the [Static SVG Rendering](https://jigonzalez930209.github.io/velo-circuit/guide/static-rendering) guide for export patterns and theme options.
+
 ## Local Development
 
 ```bash
@@ -98,12 +118,12 @@ pnpm docs:dev
 
 ## Release Workflow
 
-CI runs in GitHub Actions on Node 22 and 24. npm publish is triggered by pushing a tag like `v0.2.0`.
+CI runs in GitHub Actions on Node 22 and 24. npm publish is triggered by pushing a tag like `v1.0.0`.
 
 You can prepare and dispatch a release with:
 
 ```bash
-pnpm release:prepare -- 0.2.0
+pnpm release:prepare -- 1.0.0
 ```
 
 What it does:
