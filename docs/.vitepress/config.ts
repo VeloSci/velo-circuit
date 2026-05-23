@@ -75,7 +75,8 @@ export default defineConfig({
       ],
       '/playground/': [
         { text: 'Playground', items: [
-          { text: 'Overview', link: '/playground/' },
+          { text: 'Editor', link: '/playground/' },
+          { text: 'Grid Catalog', link: '/playground/grid' },
         ]},
       ],
     },
