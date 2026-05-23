@@ -52,6 +52,7 @@ interface StoreState {
   history: HistoryState;
   diagnostics: Diagnostic[];
   metadata: import('../domain/document.js').DocumentMetadata;
+  gridRows: import('../domain/document.js').CircuitGridRow[];
 }
 
 const MAX_HISTORY = 50;
@@ -129,6 +130,15 @@ function applyCommand(state: StoreState, command: EditorCommand): Partial<StoreS
     case 'toggle-params': {
       return { metadata: { ...state.metadata, showParams: command.show } };
     }
+    case 'toggle-strict': {
+      return { metadata: { ...state.metadata, strict: command.strict } };
+    }
+    case 'set-view-mode': {
+      return { metadata: { ...state.metadata, viewMode: command.viewMode } };
+    }
+    case 'set-grid-rows': {
+      return { gridRows: command.rows } as Partial<StoreState>;
+    }
     default:
       return {};
   }
@@ -173,6 +183,7 @@ export function createStore(initial?: Partial<CircuitDocument>): EditorStore {
     history: initial?.history ?? emptyHistory(),
     diagnostics: initial?.diagnostics ?? [],
     metadata: initial?.metadata ?? emptyMetadata(),
+    gridRows: initial?.gridRows ?? [{ id: 'row-0', dsl: 'R0-p(R1,C1)' }],
   };
 
   const listeners = new Set<StoreEventListener>();
