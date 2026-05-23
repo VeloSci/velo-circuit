@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useData } from 'vitepress';
 import { gridCatalogRows } from '../theme/circuits/grid-catalog';
 
 const props = withDefaults(defineProps<{
@@ -12,6 +13,7 @@ const props = withDefaults(defineProps<{
   strict: false,
 });
 
+const { isDark } = useData();
 const containerRef = ref<HTMLDivElement | null>(null);
 const strictMode = ref(props.strict);
 const rowCount = ref(gridCatalogRows.length);
@@ -27,6 +29,7 @@ async function mountGrid() {
     height: h,
     rowHeight: 128,
     strict: strictMode.value,
+    themeMode: isDark.value ? 'dark' : 'light',
     columns: [
       { id: 'label', label: 'Name', type: 'text', width: 120 },
       { id: 'dsl', label: 'Linear DSL', type: 'dsl', width: 340 },
@@ -39,6 +42,10 @@ async function mountGrid() {
   grid.mount(containerRef.value);
   rowCount.value = grid.getRows().length;
 }
+
+watch(isDark, (dark) => {
+  grid?.setThemeMode(dark ? 'dark' : 'light');
+});
 
 function addRow() {
   grid?.addRow({ id: `row-${Date.now()}`, dsl: 'R0{100}-C1{1e-5}', meta: { label: 'New row' } });
@@ -157,12 +164,10 @@ onBeforeUnmount(() => {
   flex: 1;
   height: 520px;
   min-height: 420px;
-  background: #f0f2f5;
+  background: var(--vp-c-bg);
 }
-.dark .grid-mount { background: #0f172a; }
 
-.grid-mount :deep(svg.circuit-grid-root) {
-  width: 100%;
-  display: block;
+.grid-mount :deep(.circuit-grid-host) {
+  border-top: 1px solid var(--vp-c-divider);
 }
 </style>
