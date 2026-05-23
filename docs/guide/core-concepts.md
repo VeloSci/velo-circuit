@@ -75,15 +75,25 @@ editor.on('render', svg => container.innerHTML = svg)
 
 ## Theming
 
-Two built-in themes:
+Light/dark themes and per-kind symbol colors:
 
 ```ts
-import { DEFAULT_THEME, DARK_THEME, getTheme } from 'velo-circuit-editor'
+import { DEFAULT_THEME, DARK_THEME, getTheme } from 'velo-circuit'
 
-renderCircuit(graph, viewport, { themeMode: 'dark' })
-// or
-renderCircuit(graph, viewport, { theme: DARK_THEME })
+renderCircuit(graph, viewport, { theme: getTheme('dark') })
 ```
+
+### Static preview options
+
+For `renderDslPreviewSvg` and documentation diagrams:
+
+| Option | Values | Default |
+|--------|--------|---------|
+| `themeMode` | `'light'`, `'dark'` | `'light'` |
+| `colorMode` | `'multicolor'`, `'bicolor'` | `'multicolor'` |
+| `connectionStyle` | `'curved'`, `'orthogonal'` | `'curved'` |
+
+See [Static SVG Rendering](/guide/static-rendering) and [Render API](/api/render).
 
 ## Next
 

@@ -40,6 +40,22 @@ editor.redo()
 editor.destroy()
 ```
 
+## Static diagram (no editor)
+
+For read-only SVG in any app or docs site:
+
+```ts
+import { renderDslPreviewSvg } from 'velo-circuit'
+
+const svg = renderDslPreviewSvg('R0-p(R1,C1)-Wo2', {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+})
+```
+
+See [Static SVG Rendering](/guide/static-rendering) for wire styles, color modes, and framework integration.
+
 ## What is a Circuit DSL?
 
 Circuits are described with Boukamp notation used in electrochemical impedance spectroscopy (EIS).
@@ -76,5 +92,7 @@ See [Element Types](/reference/element-types) for units, ranges, and symbols.
 ## Next Steps
 
 - [Build your first circuit](/examples/basic-circuit)
+- [Static SVG rendering](/guide/static-rendering) — diagrams without the editor
 - [Understand the architecture](/guide/architecture)
 - [Learn the Boukamp DSL](/guide/boukamp-dsl)
+- [Framework adapters](/adapters/)

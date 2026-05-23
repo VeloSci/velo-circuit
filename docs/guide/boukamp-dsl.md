@@ -72,3 +72,4 @@ The parser validates:
 
 - [Element Types Reference](/reference/element-types)
 - [Symbol Design System](/reference/symbol-design-system)
+- [Static SVG Rendering](/guide/static-rendering) — live diagrams in [Examples](/examples/basic-circuit)

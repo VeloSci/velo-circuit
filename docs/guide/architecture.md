@@ -76,12 +76,21 @@ const graph = buildLayout(ast)
 
 ### `core/render-svg`
 
-SVG generation from the graph.
+SVG generation from the graph — interactive editor and static preview paths.
 
 ```ts
-const svg = renderCircuit(graph, viewport, { theme: DARK_THEME })
-// → '<svg xmlns="...">...</svg>'
+// Interactive editor output
+const svg = renderCircuit(graph, viewport, { theme: getTheme('dark') })
+
+// Static preview (docs, thumbnails)
+const preview = renderDslPreviewSvg('R0-p(R1,C1)', {
+  themeMode: 'dark',
+  colorMode: 'multicolor',
+  connectionStyle: 'curved',
+})
 ```
+
+Preview mode (`preview: true`) omits selection chrome. Junction dots use `getJunctionHub()` so they align with wire convergence points in both curved and orthogonal modes.
 
 ## Design Principles
 
