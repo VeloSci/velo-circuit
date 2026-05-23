@@ -66,24 +66,37 @@ import { createViewportController } from 'velo-circuit-editor'
 
 const vc = createViewportController({ panX: 0, panY: 0, zoom: 1, width: 800, height: 600 })
 
-// Pan
 vc.pan(deltaX, deltaY)
-
-// Zoom around center
 vc.zoom(1.1, 400, 300)
-
-// Fit circuit to container
 vc.zoomToFit(bounds, 800, 600)
-
-// Reset
 vc.reset()
 ```
 
-## Build SVG Symbol
+## buildSvgElementSymbol
 
 ```ts
-import { buildSvgElementSymbol } from 'velo-circuit-editor'
+import { buildSvgElementSymbol, ElementKind } from 'velo-circuit-editor'
 
-const symbol = buildSvgElementSymbol('R', DEFAULT_THEME)
-// → '<g>...</g>'
+const symbol = buildSvgElementSymbol(ElementKind.Resistor, DEFAULT_THEME)
+// → '<g>…</g>'  (outline paths, fill="none")
 ```
+
+All symbols use an **80×40** viewBox with terminals at **(0, 20)** and **(80, 20)**. Base stroke width is **2.0 px** (`theme.strokeWidth`). Stroke multipliers and per-kind geometry are documented in the [Symbol Design System](/reference/symbol-design-system).
+
+| Kind | Code | Symbol highlights |
+|------|------|-------------------|
+| Resistor | `R` | Zigzag body between leads |
+| Capacitor | `C` | Parallel plates (1.25× stroke) |
+| Inductor | `L` | Four semicircular arcs |
+| CPE | `Q` | Angled plate + italic **n** annotation |
+| Warburg (infinite) | `W` | Vertical bar + diffusion diagonal (1.15×) |
+| Warburg (short) | `Ws` | Same as `W` + closing end bar + **s** label |
+| Warburg (open) | `Wo` | Same diagonal + open end bars + **o** label |
+| Gerischer | `G` | Warburg diagonal + reaction hook |
+| Parallel Diffusion Warburg | `Pdw` | Forked parallel diagonals |
+| Cole-Cole | `CC` | Dispersion arc + **α** |
+| Havriliak-Negami | `HN` | Dual arcs + **α,β** |
+
+Per-kind stroke color uses CSS variables `--ce-{kind}-stroke` on `.circuit-node[data-kind="…"]`.
+
+Implementation: [`src/core/render-svg/symbols.ts`](../../src/core/render-svg/symbols.ts).
