@@ -11,6 +11,10 @@ export interface VanillaEditorInstance {
   on(event: string, handler: (...args: unknown[]) => void): () => void;
   undo(): void;
   redo(): void;
+  fitView(): void;
+  resetView(): void;
+  setShowParams(show: boolean): void;
+  setStrict(strict: boolean): void;
 }
 
 export function mountCircuitEditor(options: VanillaEditorOptions): VanillaEditorInstance {
@@ -42,6 +46,22 @@ export function mountCircuitEditor(options: VanillaEditorOptions): VanillaEditor
 
     redo(): void {
       editor.redo();
+    },
+
+    fitView(): void {
+      editor.fitView();
+    },
+
+    resetView(): void {
+      editor.resetView();
+    },
+
+    setShowParams(show: boolean): void {
+      editor.setShowParams(show);
+    },
+
+    setStrict(strict: boolean): void {
+      editor.setStrict(strict);
     },
   };
 }

@@ -16,6 +16,9 @@ export interface ReactEditorInstance {
   undo(): void;
   redo(): void;
   destroy(): void;
+  fitView(): void;
+  setShowParams(show: boolean): void;
+  setStrict(strict: boolean): void;
 }
 
 export function createReactCircuitEditor(
@@ -50,6 +53,9 @@ export function createReactCircuitEditor(
     undo() { editor.undo(); },
     redo() { editor.redo(); },
     destroy() { editor.destroy(); },
+    fitView() { editor.fitView(); },
+    setShowParams(show: boolean) { editor.setShowParams(show); },
+    setStrict(strict: boolean) { editor.setStrict(strict); },
   };
 }
 

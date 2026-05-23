@@ -12,6 +12,9 @@ export interface VueEditorInstance {
   undo(): void;
   redo(): void;
   destroy(): void;
+  fitView(): void;
+  setShowParams(show: boolean): void;
+  setStrict(strict: boolean): void;
 }
 
 export function createVueCircuitEditor(container: HTMLElement, options: {
@@ -44,6 +47,9 @@ export function createVueCircuitEditor(container: HTMLElement, options: {
     undo() { editor.undo(); },
     redo() { editor.redo(); },
     destroy() { editor.destroy(); },
+    fitView() { editor.fitView(); },
+    setShowParams(show: boolean) { editor.setShowParams(show); },
+    setStrict(strict: boolean) { editor.setStrict(strict); },
   };
 }
 

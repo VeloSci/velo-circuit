@@ -7,6 +7,9 @@ export interface AngularEditorAdapter {
     setValue: (dsl: string) => void;
     undo: () => void;
     redo: () => void;
+    fitView: () => void;
+    setShowParams: (show: boolean) => void;
+    setStrict: (strict: boolean) => void;
     destroy: () => void;
     dslChange: { emit: (dsl: string) => void };
     editorEvent: { emit: (e: { type: string; payload?: unknown }) => void };
@@ -39,6 +42,9 @@ export function createAngularCircuitEditorAdapter(): AngularEditorAdapter {
       setValue: (dsl: string) => editor.setValue(dsl),
       undo: () => editor.undo(),
       redo: () => editor.redo(),
+      fitView: () => editor.fitView(),
+      setShowParams: (show: boolean) => editor.setShowParams(show),
+      setStrict: (strict: boolean) => editor.setStrict(strict),
       destroy: () => editor.destroy(),
       dslChange: {
         emit: (dsl: string) => dslChangeHandlers.forEach(h => h(dsl)),
