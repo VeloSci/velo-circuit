@@ -79,6 +79,7 @@ describe('Standalone SVG API', () => {
   it('renderDslPreviewSvg omits editor chrome and uses curved wires by default', async () => {
     const { renderDslPreviewSvg } = await import('../src/core/render-svg/renderer-ex.js');
     const svg = renderDslPreviewSvg('R0-p(R1,C1)-W2', { themeMode: 'dark', colorMode: 'multicolor' });
+    expect(svg).not.toContain('height="auto"');
     expect(svg).toContain('class="circuit-preview"');
     expect(svg).not.toContain('node-bg');
     expect(svg).not.toContain('node-hit');
