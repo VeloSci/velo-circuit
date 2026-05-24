@@ -295,6 +295,11 @@ function defaultParamValue(kind: ElementKind, index: number): number {
   return 1;
 }
 
+/** Default parameter vector for a newly inserted element kind. */
+export function defaultParamsForKind(kind: ElementKind): number[] {
+  return Array.from({ length: nParams(kind) }, (_, i) => defaultParamValue(kind, i));
+}
+
 /**
  * Replace an element's kind, resolving id collisions and remembering per-kind ids for this slot.
  */
