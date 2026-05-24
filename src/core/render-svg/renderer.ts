@@ -197,6 +197,12 @@ export function buildCircuitLayers(
   };
 }
 
+/** SVG presentation attributes reject `auto`; omit invalid values. */
+function svgLengthAttr(name: 'width' | 'height', value: number | string | undefined): string {
+  if (value == null || value === '' || value === 'auto') return '';
+  return ` ${name}="${value}"`;
+}
+
 export function renderCircuit(
   graph: EditableGraph,
   _viewport: ViewportState,
@@ -205,14 +211,15 @@ export function renderCircuit(
   const theme = options.theme ?? DEFAULT_THEME;
   const preview = options.preview ?? false;
   const width = options.width ?? '100%';
-  const height = options.height ?? '100%';
+  const height = options.height ?? (preview ? undefined : '100%');
   const viewBoxAttr = options.viewBox ? ` viewBox="${options.viewBox}"` : '';
+  const sizeAttrs = `${svgLengthAttr('width', width)}${svgLengthAttr('height', height)}`;
   const layers = buildCircuitLayers(graph, options);
   const rootClass = preview ? 'circuit-preview' : 'circuit-editor';
 
   if (preview) {
     return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"${viewBoxAttr} class="${rootClass}" overflow="visible">
+<svg xmlns="http://www.w3.org/2000/svg"${sizeAttrs}${viewBoxAttr} class="${rootClass}" overflow="visible">
   <g id="content-layer">
     <g id="connections">${layers.connections}</g>
     <g id="nodes">${layers.nodes}</g>
@@ -221,7 +228,7 @@ export function renderCircuit(
   }
 
   return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"${viewBoxAttr} class="${rootClass}" overflow="visible">
+<svg xmlns="http://www.w3.org/2000/svg"${sizeAttrs}${viewBoxAttr} class="${rootClass}" overflow="visible">
   <style>
     .circuit-node { cursor: pointer; }
     .circuit-node:hover .node-bg { stroke: ${theme.colors.highlight}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }
