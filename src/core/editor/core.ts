@@ -8,7 +8,7 @@ import { PluginRegistry } from '../plugins/types.js';
 import type { PanZoomPluginAPI } from '../plugins/pan-zoom.plugin.js';
 import { createElement } from '../domain/circuit.js';
 import { createStore } from '../state/store.js';
-import { createAdapter } from '../parser-bridge/index.js';
+import { createAdapter, assignParamOffsets } from '../parser-bridge/index.js';
 import { buildLayout, computeBounds } from '../layout/layout-engine.js';
 import { buildCircuitLayers, collectInvalidElementIds } from '../render-svg/renderer.js';
 import { buildEditorSvgShell } from '../render-svg/infinite-grid.js';
@@ -35,6 +35,7 @@ import {
   moveElementRight,
   changeElementKind as changeElementKindInAst,
   getElementContext,
+  defaultParamsForKind,
   type ParentContext,
 } from './commands-builder.js';
 
@@ -243,12 +244,13 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
   }
 
   function loadAst(ast: CircuitNode): void {
+    const normalized = assignParamOffsets(ast);
     store.dispatch({
       type: 'load-circuit',
       id: makeCommandId(),
       timestamp: Date.now(),
       description: 'Load circuit',
-      ast,
+      ast: normalized,
     } as LoadCircuitCommand);
   }
 
@@ -256,7 +258,7 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
     const currentAst = getCurrentAst();
     const nextId = generateNextElementId(currentAst, kind);
     const nextOffset = computeNextParamOffset(currentAst);
-    return createElement(kind, nextId, nextOffset);
+    return createElement(kind, nextId, nextOffset, defaultParamsForKind(kind));
   }
 
   const instance: EditorInstance = {
