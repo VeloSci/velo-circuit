@@ -287,7 +287,6 @@ export function renderDslPreviewSvg(dsl: string, options: DslPreviewOptions = {}
     showLabels: options.showLabels,
     showParams: options.showParams,
     width: options.width ?? '100%',
-    height: options.height ?? 'auto',
   });
   if (!svg) return '';
   return exportPreviewSvgWithStyles(svg, theme, { colorMode, themeMode });
