@@ -3,6 +3,7 @@ import type { CircuitNode } from '../domain/circuit.js';
 import { ELEMENT_KINDS } from '../domain/circuit.js';
 import { escapeHtmlAttr } from '../domain/param-labels.js';
 import { invalidParameterReason } from '../parser-bridge/physical.js';
+import { findElementLayout, WORKSPACE_SETTLED } from './overlay-ui.js';
 
 function findElementNode(ast: CircuitNode, id: string): CircuitNode | null {
   if (ast.type === 'element' && `${ast.kind}${ast.id}` === id) return ast;
@@ -28,21 +29,19 @@ export function paramEditPlugin(): EditorPlugin {
     clearLayer();
     if (!selectedId || !layerEl) return;
 
-    const svg = ctx.container.querySelector('svg.circuit-editor-root, svg.circuit-editor');
-    const nodeG = svg?.querySelector(`[data-element-id="${selectedId}"]`) as SVGGElement | null;
-    if (!nodeG) return;
-
     const elementNode = findElementNode(ctx.editor.getDocument().ast, selectedId);
     if (!elementNode || elementNode.type !== 'element') return;
+
+    const layout = findElementLayout(ctx.editor.getDocument().ast, selectedId);
+    if (!layout) return;
 
     const def = ELEMENT_KINDS.get(elementNode.kind);
     if (!def) return;
 
     const params = elementNode.params ?? new Array(def.nParams).fill(0);
-    const bbox = nodeG.getBBox();
-    const x = bbox.x;
-    const y = bbox.y + bbox.height + 4;
-    const w = Math.max(bbox.width, 90);
+    const x = layout.visualX;
+    const y = layout.visualY + layout.height + 4;
+    const w = Math.max(layout.width, 90);
     const h = 18 * def.nParams + 8;
     const strict = ctx.editor.getDocument().metadata.strict;
 
@@ -64,6 +63,7 @@ export function paramEditPlugin(): EditorPlugin {
     fo.setAttribute('y', String(y));
     fo.setAttribute('width', String(w));
     fo.setAttribute('height', String(h));
+    fo.addEventListener('pointerdown', (e) => e.stopPropagation());
 
     const wrapper = document.createElementNS(ns, 'div');
     wrapper.setAttribute('style', 'background:var(--ce-surface,#fff);border:1px solid var(--ce-border,#ccc);border-radius:4px;padding:4px;');
@@ -105,6 +105,9 @@ export function paramEditPlugin(): EditorPlugin {
       });
 
       ctx.editor.on('ast-changed', () => renderEditor());
+      ctx.on(WORKSPACE_SETTLED, () => {
+        if (selectedId) renderEditor();
+      });
     },
     destroy() {
       clearLayer();
