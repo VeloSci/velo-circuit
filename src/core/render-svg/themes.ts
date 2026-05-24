@@ -149,6 +149,9 @@ export function buildPreviewThemeCSS(theme: RenderTheme, options: ThemeCSSOption
       --ce-stroke-width: ${theme.strokeWidth};
       --ce-font-size: ${theme.fontSize}px;
       --ce-font-family: ${theme.fontFamily};
+      width: 100%;
+      height: auto;
+      display: block;
       background: transparent;
       color: ${theme.colors.text};
     }
