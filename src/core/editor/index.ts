@@ -4,6 +4,13 @@ export * from './panels.js';
 export * from './interaction.js';
 export * from './commands-builder.js';
 export * from './dsl-equation-editor.js';
+export {
+  createDslCodeMirror,
+  clearElementSymbolIconCache,
+  type DslCodeMirrorOptions,
+  type DslCodeMirrorHandle,
+  type DslCodeMirrorTheme,
+} from './dsl-codemirror.js';
 
 export type { EditorInstance, EditorOptions, EditorEvent, EditorEventType, EventHandler, InsertMode } from './core.js';
 export type { InteractionTool, InteractionState, InteractionHandler, PointerEvent, ContextMenuItem } from './interaction.js';
