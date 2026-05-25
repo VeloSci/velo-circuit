@@ -10,7 +10,7 @@ export * from './plugins/index.js';
 export { createEditor, type EditorInstance, type EditorOptions, type EditorEvent, type EditorEventType, type EventHandler, type InsertMode } from './editor/index.js';
 export { createStore, type EditorStore } from './state/index.js';
 export { buildLayout, computeBounds, type LayoutOptions, DEFAULT_LAYOUT_OPTIONS } from './layout/index.js';
-export { createAdapter, type CircuitParserAdapter, type StrictOptions, parseBoukamp, serialize, validate, validateParameterValues, tokenize, ElementRegistry, assignParamOffsets, parameterCount } from './parser-bridge/index.js';
+export { createAdapter, type CircuitParserAdapter, type StrictOptions, parseBoukamp, serialize, validate, validateParameterValues, tokenize, ElementRegistry, assignParamOffsets, parameterCount, resolveCircuitParams, formatMissingParams, buildAstDiagnostics } from './parser-bridge/index.js';
 export { renderCircuit, renderCircuitToElement, extractSvgString, renderCircuitEx, renderDocument, extractSvgSnapshot, exportSvgWithStyles, exportPreviewSvgWithStyles, renderDslPreviewSvg, renderDslToSvg, buildCircuitLayers, collectInvalidElementIds, buildInfiniteGridLayer, buildEditorSvgShell, type SvgRenderOptions, type RenderOptions, type InteractionOverlay, type DslPreviewOptions, type ConnectionStyle } from './render-svg/index.js';
 export { getJunctionHub } from './domain/graph.js';
 export { createCircuitGrid, importSpectrozCatalog, type CircuitGridOptions, type CircuitGridInstance, type GridColumnDef } from './grid/index.js';
