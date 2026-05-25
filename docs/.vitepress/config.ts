@@ -39,6 +39,7 @@ export default defineConfig({
           { text: 'Static SVG Rendering', link: '/guide/static-rendering' },
           { text: 'Architecture', link: '/guide/architecture' },
           { text: 'Core Concepts', link: '/guide/core-concepts' },
+          { text: 'Editor Presets', link: '/guide/editor-presets' },
           { text: 'Boukamp DSL', link: '/guide/boukamp-dsl' },
           { text: 'Migration to v1.0', link: '/guide/migration-v1' },
           { text: 'Release and Publish', link: '/guide/release-and-publish' },
@@ -58,8 +59,12 @@ export default defineConfig({
       ],
       '/api/': [
         { text: 'API', items: [
+          { text: 'Package Exports', link: '/api/exports' },
           { text: 'Core', link: '/api/core' },
           { text: 'Editor', link: '/api/editor' },
+          { text: 'Plugins', link: '/api/plugins' },
+          { text: 'Grid', link: '/api/grid' },
+          { text: 'DSL Editor', link: '/api/dsl-editor' },
           { text: 'Parser', link: '/api/parser' },
           { text: 'Layout', link: '/api/layout' },
           { text: 'Render & Themes', link: '/api/render' },
