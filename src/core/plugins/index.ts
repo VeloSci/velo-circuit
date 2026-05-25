@@ -9,6 +9,7 @@ export { gridViewPlugin } from './grid-view.plugin.js';
 export { keyboardPlugin } from './keyboard.plugin.js';
 export { toolbarPlugin } from './toolbar.plugin.js';
 export { dslPanelPlugin, diagnosticsPlugin, exportPanelPlugin } from './sidebar.plugin.js';
+export { dslCodemirrorPanelPlugin } from './dsl-codemirror.plugin.js';
 export { themePlugin, THEME_CSS } from './theme.plugin.js';
 
 import type { EditorPlugin } from './types.js';
@@ -22,7 +23,8 @@ import { paramEditPlugin } from './param-edit.plugin.js';
 import { gridViewPlugin } from './grid-view.plugin.js';
 import { keyboardPlugin } from './keyboard.plugin.js';
 import { toolbarPlugin } from './toolbar.plugin.js';
-import { dslPanelPlugin, diagnosticsPlugin, exportPanelPlugin } from './sidebar.plugin.js';
+import { diagnosticsPlugin, exportPanelPlugin } from './sidebar.plugin.js';
+import { dslCodemirrorPanelPlugin } from './dsl-codemirror.plugin.js';
 
 /** All plugins — full-featured editor */
 export function allPlugins(): EditorPlugin[] {
@@ -36,7 +38,7 @@ export function allPlugins(): EditorPlugin[] {
     gridViewPlugin(),
     keyboardPlugin(),
     toolbarPlugin(),
-    dslPanelPlugin(),
+    dslCodemirrorPanelPlugin(),
     diagnosticsPlugin(),
     exportPanelPlugin(),
   ];
