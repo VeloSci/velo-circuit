@@ -6,6 +6,7 @@ import type { ViewportState } from '../domain/document.js';
 import { paramShortLabel } from '../domain/param-labels.js';
 import { buildSvgElementSymbol, buildParallelSymbol, buildSeriesSymbol, DEFAULT_THEME, type RenderTheme } from './symbols.js';
 import { parseBoukamp } from '../parser-bridge/index.js';
+import { resolveCircuitParams } from '../parser-bridge/resolve-params.js';
 import { buildLayout } from '../layout/index.js';
 import { invalidParameterReason } from '../parser-bridge/physical.js';
 
@@ -246,8 +247,14 @@ export function renderCircuit(
 </svg>`.trim();
 }
 
-export function collectInvalidElementIds(ast: CircuitNode): Set<string> {
+export function collectInvalidElementIds(ast: CircuitNode, external?: number[]): Set<string> {
   const invalid = new Set<string>();
+  const resolved = resolveCircuitParams(ast, { external });
+  if (!resolved.ok) {
+    for (const m of resolved.missing) {
+      invalid.add(`${m.kind}${m.id}`);
+    }
+  }
   function walk(node: CircuitNode): void {
     if (node.type === 'element') {
       if (node.params) {
