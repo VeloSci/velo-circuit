@@ -13,6 +13,7 @@ import { buildLayout, computeBounds } from '../layout/layout-engine.js';
 import { buildCircuitLayers, collectInvalidElementIds } from '../render-svg/renderer.js';
 import { buildEditorSvgShell } from '../render-svg/infinite-grid.js';
 import { DEFAULT_THEME } from '../render-svg/symbols.js';
+import type { ThemeMode } from '../render-svg/themes.js';
 import { defaultViewport } from '../domain/document.js';
 import { makeCommandId } from '../domain/commands.js';
 import { serialize } from '../parser-bridge/serializer.js';
@@ -67,6 +68,8 @@ export interface EditorOptions {
   blockInvalidSetValue?: boolean;
   viewMode?: 'circuit' | 'grid';
   initialGridRows?: CircuitGridRow[];
+  /** Initial editor chrome theme (lite/extended without toolbar toggle). */
+  themeMode?: ThemeMode;
 }
 
 export type InsertMode = 'series' | 'parallel';
@@ -320,6 +323,10 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
       // Register additional plugins from mount options
       if (options?.plugins) {
         for (const p of options.plugins) pluginRegistry.register(p);
+      }
+
+      if (options?.themeMode) {
+        container.dataset.ceThemeMode = options.themeMode;
       }
 
       // Install plugins FIRST so they create .ce-canvas, .ce-workspace, etc.
