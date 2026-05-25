@@ -70,6 +70,8 @@ The parser validates:
 
 ## Next
 
+- [DSL Editor API](/api/dsl-editor) — CodeMirror field and theme sync
+- [Parser API](/api/parser) — `parseBoukamp`, `validate`
 - [Element Types Reference](/reference/element-types)
 - [Symbol Design System](/reference/symbol-design-system)
 - [Static SVG Rendering](/guide/static-rendering) — live diagrams in [Examples](/examples/basic-circuit)

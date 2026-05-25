@@ -95,6 +95,23 @@ For `renderDslPreviewSvg` and documentation diagrams:
 
 See [Static SVG Rendering](/guide/static-rendering) and [Render API](/api/render).
 
+The DSL CodeMirror field uses the same `themeMode` as the editor — see [DSL Editor API](/api/dsl-editor#theme-rule-important).
+
+## Plugin presets and view mode
+
+```ts
+import { createEditor, resolvePlugins } from 'velo-circuit'
+
+const editor = createEditor({ plugins: resolvePlugins('lite') })
+editor.mount(host, { viewMode: 'circuit' })
+
+// Extended only: toggle catalog grid inside editor
+editor.setViewMode('grid')
+```
+
+[Editor Presets](/guide/editor-presets) · [Plugins API](/api/plugins) · [Grid API](/api/grid)
+
 ## Next
 
+- [Editor Presets](/guide/editor-presets)
 - [Learn the Boukamp DSL](/guide/boukamp-dsl)

@@ -12,12 +12,22 @@ Or import directly from the source:
 import { createEditor } from './src/core/index.ts'
 ```
 
-## Minimal Example
+## Three integration paths
+
+| Path | API | Doc |
+|------|-----|-----|
+| Full editor | `createEditor()` or adapter `preset: 'extended'` | Below |
+| Embed canvas only | `preset: 'lite'` or `litePlugins()` | [Editor Presets](/guide/editor-presets) |
+| Read-only diagram | `renderDslPreviewSvg()` | [Static SVG](/guide/static-rendering) |
+
+Standalone building blocks: [Grid API](/api/grid), [DSL Editor API](/api/dsl-editor).
+
+## Extended editor (default)
 
 ```ts
-import { createEditor } from 'velo-circuit'
+import { createEditor, allPlugins } from 'velo-circuit'
 
-const editor = createEditor()
+const editor = createEditor({ plugins: allPlugins() })
 
 editor.mount(document.getElementById('canvas'), {
   initialDsl: 'R0-p(R1,C1)-Wo2',
@@ -89,10 +99,20 @@ Circuits are described with Boukamp notation used in electrochemical impedance s
 
 See [Element Types](/reference/element-types) for units, ranges, and symbols.
 
+## Lite embed (framework)
+
+```tsx
+import { useCircuitEditor } from 'velo-circuit/react'
+
+const { containerRef } = useCircuitEditor({ preset: 'lite', initialDsl: 'R0-p(R1,C1)' })
+```
+
 ## Next Steps
 
+- [Editor presets](/guide/editor-presets) — lite vs extended vs minimal
+- [Package exports](/api/exports) — what to import
 - [Build your first circuit](/examples/basic-circuit)
-- [Static SVG rendering](/guide/static-rendering) — diagrams without the editor
-- [Understand the architecture](/guide/architecture)
-- [Learn the Boukamp DSL](/guide/boukamp-dsl)
+- [Static SVG rendering](/guide/static-rendering)
+- [Architecture](/guide/architecture)
+- [Boukamp DSL](/guide/boukamp-dsl)
 - [Framework adapters](/adapters/)

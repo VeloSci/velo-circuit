@@ -2,11 +2,17 @@
 
 ## Overview
 
-The editor is built in three layers:
+The editor is built in four layers:
 
 ```
 ┌───────────────────────────────────────────────┐
 │  Adapter Layer (React / Vue / Angular / ...)  │
+│  preset: extended | lite | minimal            │
+└──────────────────────┬────────────────────────┘
+                       │
+┌──────────────────────▼─────────────────────┐
+│  Plugin UI (toolbar, DSL panel, grid, …)   │
+│  allPlugins() | litePlugins() | custom      │
 └──────────────────────┬────────────────────────┘
                        │
 ┌──────────────────────▼─────────────────────┐
@@ -21,10 +27,11 @@ The editor is built in three layers:
  └──────┬──┘   └───┬────┘    └──────┬──────┘
         │          │                │
 ┌───────▼──────────▼────────────────▼──────┐
-│           SVG Renderer                   │
-│  renderCircuit() → SVG string            │
+│  SVG Renderer + standalone Grid / DSL CM │
 └──────────────────────────────────────────┘
 ```
+
+Standalone modules (`createCircuitGrid`, `createDslCodeMirror`, `renderDslPreviewSvg`) sit beside the editor and share parser/layout/render.
 
 ## Key Modules
 
@@ -92,6 +99,14 @@ const preview = renderDslPreviewSvg('R0-p(R1,C1)', {
 
 Preview mode (`preview: true`) omits selection chrome. Junction dots use `getJunctionHub()` so they align with wire convergence points in both curved and orthogonal modes.
 
+### `core/plugins`
+
+Composable UI via `EditorPlugin` factories. Presets: [Editor Presets](/guide/editor-presets).
+
+### `core/grid`
+
+Virtualized catalog table (`createCircuitGrid`) — used standalone or via `gridViewPlugin` in extended mode.
+
 ## Design Principles
 
 1. **No framework coupling** — the core never imports React, Vue, or any other library.
@@ -101,4 +116,6 @@ Preview mode (`preview: true`) omits selection chrome. Junction dots use `getJun
 
 ## Next
 
+- [Editor Presets](/guide/editor-presets)
+- [Plugins API](/api/plugins)
 - [Core Concepts](/guide/core-concepts)
