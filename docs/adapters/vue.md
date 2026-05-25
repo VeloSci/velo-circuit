@@ -1,8 +1,58 @@
 # Vue 3
 
-> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/vue` · [Adapters overview](/adapters/) · [Static SVG](/guide/static-rendering)
+> **Package:** `velo-circuit` · **Adapter:** `velo-circuit/vue` · [Overview](/adapters/) · [Editor Presets](/guide/editor-presets)
 
-## Static SVG in Vue
+Same three levels as React: `useDslCodeMirror` (DSL only), `useCircuitEditor` (canvas), `useCircuitWorkbench` (synced pair). See [React adapter](/adapters/react) for the composition pattern.
+
+## Extended editor
+
+```vue
+<script setup lang="ts">
+import { useCircuitEditor } from 'velo-circuit/vue'
+
+const { containerRef } = useCircuitEditor({
+  preset: 'extended',
+  initialDsl: 'R0-p(R1,C1)',
+  onDslChange: (dsl) => console.log(dsl),
+})
+</script>
+
+<template>
+  <div ref="containerRef" style="width: 800px; height: 600px" />
+</template>
+```
+
+## Lite embed
+
+```vue
+<script setup lang="ts">
+import { useCircuitEditor } from 'velo-circuit/vue'
+
+const { containerRef } = useCircuitEditor({ preset: 'lite', initialDsl: 'R0' })
+</script>
+
+<template>
+  <div ref="containerRef" class="circuit-canvas" />
+</template>
+```
+
+## Controlled DSL
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useCircuitEditor } from 'velo-circuit/vue'
+
+const dsl = ref('R0-p(R1,C1)')
+const { containerRef } = useCircuitEditor({
+  preset: 'extended',
+  value: dsl,
+  onDslChange: (v) => (dsl.value = v),
+})
+</script>
+```
+
+## Static SVG
 
 ```vue
 <script setup lang="ts">
@@ -10,11 +60,9 @@ import { computed } from 'vue'
 import { renderDslPreviewSvg } from 'velo-circuit'
 
 const props = defineProps<{ dsl: string }>()
-const svg = computed(() => renderDslPreviewSvg(props.dsl, {
-  themeMode: 'dark',
-  colorMode: 'multicolor',
-  connectionStyle: 'curved',
-}))
+const svg = computed(() =>
+  renderDslPreviewSvg(props.dsl, { themeMode: 'dark', colorMode: 'multicolor' }),
+)
 </script>
 
 <template>
@@ -22,134 +70,103 @@ const svg = computed(() => renderDslPreviewSvg(props.dsl, {
 </template>
 ```
 
-## Basic Usage
+## Standalone DSL (theme-synced)
 
 ```vue
-<template>
-  <div>
-    <div ref="editorContainer" style="width: 800px; height: 600px;" />
-    <pre>{{ dsl }}</pre>
-    <button @click="setDsl('R0-C1')">Reset</button>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { createVueCircuitEditor, type VueEditorInstance } from 'velo-circuit/vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { createDslCodeMirror } from 'velo-circuit'
 
-const editorContainer = ref<HTMLDivElement | null>(null)
-const dsl = ref('R0-p(R1,C1)-Wo2')
-let editor: VueEditorInstance | null = null
+const parent = ref<HTMLElement | null>(null)
+const theme = ref<'light' | 'dark'>('dark')
+let handle: ReturnType<typeof createDslCodeMirror> | null = null
 
-onMounted(() => {
-  if (!editorContainer.value) return
-
-  editor = createVueCircuitEditor(editorContainer.value, {
-    initialDsl: dsl.value,
-    onDslChange: (newDsl: string) => { dsl.value = newDsl },
+function mountDsl() {
+  handle?.destroy()
+  if (!parent.value) return
+  handle = createDslCodeMirror({
+    parent: parent.value,
+    initialValue: 'R0',
+    getAst: () => null,
+    themeMode: theme.value,
+    onChange: () => {},
   })
-})
+}
 
-onUnmounted(() => {
-  editor?.destroy()
-})
+onMounted(mountDsl)
+watch(theme, mountDsl)
+onBeforeUnmount(() => handle?.destroy())
 </script>
+
+<template>
+  <button @click="theme = theme === 'dark' ? 'light' : 'dark'">Theme</button>
+  <div ref="parent" />
+</template>
 ```
 
-## v-model Support
+## Standalone grid
+
+```ts
+import { createVueCircuitEditor } from 'velo-circuit/vue'
+import { createCircuitGrid } from 'velo-circuit'
+
+// Or mount grid in onMounted with createCircuitGrid — see Grid API
+```
+
+## Options (`useCircuitEditor`)
+
+| Option | Type | Default |
+|--------|------|---------|
+| `preset` | `'extended' \| 'lite' \| 'minimal'` | `'extended'` |
+| `initialDsl` | `string` | — |
+| `value` | `Ref<string>` | — |
+| `width` / `height` | `number` | — |
+| `onDslChange` | `(dsl: string) => void` | — |
+| `onEvent` | `(e) => void` | — |
+
+## DSL only
 
 ```vue
-<template>
-  <CircuitEditor v-model="circuitDsl" />
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
-const circuitDsl = ref('R0-C1')
+import { useDslCodeMirror } from 'velo-circuit/vue'
+
+const dsl = ref('R0-p(R1,C1)')
+const { containerRef } = useDslCodeMirror({ value: dsl, themeMode: 'dark' })
 </script>
+<template><div ref="containerRef" /></template>
 ```
 
-## Mount by ID
-
-```js
-import { mountVueCircuitEditor } from 'velo-circuit/vue'
-
-const editor = mountVueCircuitEditor('editor-container', {
-  initialDsl: 'R0-p(R1,C1)-Wo2',
-  onDslChange: (dsl) => console.log(dsl),
-})
-```
-
-## Props
-
-| Prop | Type | Emits | Description |
-|------|------|--------|-------------|
-| `modelValue` | `string` | `update:modelValue` | v-model bound DSL |
-| `initialDsl` | `string` | — | Initial circuit |
-| `width` | `number` | — | Canvas width |
-| `height` | `number` | — | Canvas height |
-
----
-
-## Complete Playground Example
-
-This is a complete, copy-pasteable implementation of an interactive playground using the `useCircuitEditor` composable. It mirrors the vanilla playground exactly!
+## Workbench (DSL + lite)
 
 ```vue
-<template>
-  <div class="playground-container" style="display: flex; flex-direction: column; gap: 1rem; padding: 1rem; background: #1e1e1e; color: white; border-radius: 8px;">
-    
-    <!-- Top Toolbar -->
-    <div class="toolbar" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-      <button @click="appendSeries('R')" :style="btnStyle">Resistor (R)</button>
-      <button @click="appendSeries('C')" :style="btnStyle">Capacitor (C)</button>
-      <button @click="appendSeries('L')" :style="btnStyle">Inductor (L)</button>
-      <div style="flex: 1;"></div>
-      <button @click="editorRef?.undo()" :style="btnStyle">Undo</button>
-      <button @click="editorRef?.redo()" :style="btnStyle">Redo</button>
-    </div>
-
-    <!-- Editor Canvas Container -->
-    <div 
-      ref="containerRef" 
-      style="width: 100%; height: 400px; border: 1px solid #333; border-radius: 4px; overflow: hidden;"
-    ></div>
-
-    <!-- State Diagnostics -->
-    <div class="diagnostics" style="background: #000; padding: 1rem; border-radius: 4px; font-family: monospace;">
-      <strong>Current DSL:</strong> {{ dsl || 'Empty Circuit' }}
-    </div>
-
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useCircuitEditor } from 'velo-circuit/vue';
+import { ref } from 'vue'
+import { useCircuitWorkbench } from 'velo-circuit/vue'
 
-const dsl = ref('R0-p(R1,C1)');
-
-// Initialize the editor with our Vue Composable adapter
-const { containerRef, editorRef } = useCircuitEditor({
+const dsl = ref('R0')
+const { dslRef, editorRef } = useCircuitWorkbench({
   value: dsl,
-  onDslChange: (newDsl) => {
-    dsl.value = newDsl;
-  }
-});
-
-const appendSeries = (elementCode: string) => {
-  if (!editorRef.value) return;
-  const current = editorRef.value.getValue();
-  editorRef.value.setValue(current ? \`\${current}-\${elementCode}\` : elementCode);
-};
-
-const btnStyle = {
-  padding: '6px 12px',
-  background: '#3a3a3a',
-  color: 'white',
-  border: '1px solid #555',
-  borderRadius: '4px',
-  cursor: 'pointer'
-};
+  editorPreset: 'lite',
+  themeMode: 'dark',
+})
 </script>
+<template>
+  <div ref="dslRef" />
+  <div ref="editorRef" style="height: 400px" />
+</template>
 ```
+
+## API
+
+| Export | Description |
+|--------|-------------|
+| `useDslCodeMirror` | Standalone Boukamp field |
+| `useCircuitWorkbench` | Synced DSL + editor |
+| `useCircuitEditor` | Composition API hook |
+| `createVueCircuitEditor` | Imperative mount |
+| `mountVueCircuitEditor` | Mount by container id |
+
+## Related
+
+- [Grid API](/api/grid) · [DSL Editor API](/api/dsl-editor)
