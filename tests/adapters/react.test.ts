@@ -111,6 +111,13 @@ describe('react adapter', () => {
     expect(() => instance.destroy()).not.toThrow();
   });
 
+  it('createReactCircuitEditor mounts with preset lite', () => {
+    const instance = createReactCircuitEditor(container, { preset: 'lite', initialDsl: 'R0' });
+    expect(instance.getValue()).toBe('R0');
+    expect(container.querySelector('.ce-toolbar')).toBeNull();
+    instance.destroy();
+  });
+
   it('multiple instances can coexist', () => {
     const container2 = document.createElement('div');
     document.body.appendChild(container2);

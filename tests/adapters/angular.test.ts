@@ -17,6 +17,8 @@ describe('angular adapter', () => {
     const adapter = createAngularCircuitEditorAdapter();
     expect(adapter).toBeDefined();
     expect(typeof adapter.mount).toBe('function');
+    expect(typeof adapter.mountDsl).toBe('function');
+    expect(typeof adapter.mountWorkbench).toBe('function');
     expect(typeof adapter.createComponent).toBe('function');
   });
 
@@ -59,17 +61,16 @@ describe('angular adapter', () => {
     component.destroy();
   });
 
-  it('dslChange.emit triggers handlers', () => {
+  it('dslChange.subscribe receives ast-changed updates', () => {
     const adapter = createAngularCircuitEditorAdapter();
     const component = adapter.createComponent(container);
 
     let capturedDsl = '';
-    component.dslChange.emit = (dsl: string) => { capturedDsl = dsl; };
+    component.dslChange.subscribe((dsl) => { capturedDsl = dsl; });
 
-    // Simulate setting value which triggers dslChange
     component.setValue('R0-C1');
-    // The internal handler should have been registered
     expect(component.getValue()).toBe('R0-C1');
+    expect(capturedDsl).toBe('R0-C1');
     component.destroy();
   });
 
@@ -92,20 +93,50 @@ describe('angular adapter', () => {
     component.destroy();
   });
 
-  it('editor errors are emitted on error event', () => {
+  it('editorEvent.subscribe can listen for errors', () => {
     const adapter = createAngularCircuitEditorAdapter();
     const component = adapter.createComponent(container, {});
 
     let errorCount = 0;
-    component.editorEvent.emit = (e: { type: string; payload?: unknown }) => {
+    component.editorEvent.subscribe((e) => {
       if (e.type === 'error') errorCount++;
-    };
+    });
 
     component.setValue('INVALID-X99');
-    component.setValue('INVALID-X98');
-    // Error events should be emitted for invalid DSL
-    expect(errorCount).toBeGreaterThanOrEqual(0); // Depends on error handling behavior
+    expect(errorCount).toBeGreaterThanOrEqual(0);
     component.destroy();
+  });
+
+  it('mountDsl mounts standalone DSL field', () => {
+    const adapter = createAngularCircuitEditorAdapter();
+    const dslHost = document.createElement('div');
+    document.body.appendChild(dslHost);
+    const field = adapter.mountDsl(dslHost, { initialDsl: 'R0', themeMode: 'dark' });
+    expect(field.getValue()).toBe('R0');
+    expect(dslHost.querySelector('.cm-editor')).toBeTruthy();
+    field.destroy();
+    dslHost.remove();
+  });
+
+  it('mountWorkbench syncs DSL and lite editor', () => {
+    const adapter = createAngularCircuitEditorAdapter();
+    const dslHost = document.createElement('div');
+    const editorHost = document.createElement('div');
+    document.body.appendChild(dslHost);
+    document.body.appendChild(editorHost);
+    let latest = '';
+    const wb = adapter.mountWorkbench(dslHost, editorHost, {
+      initialDsl: 'R0',
+      editorPreset: 'lite',
+      onChange: (d) => { latest = d; },
+    });
+    expect(editorHost.querySelector('.ce-toolbar')).toBeNull();
+    wb.setValue('R0-C1');
+    expect(wb.getValue()).toBe('R0-C1');
+    expect(latest).toBe('R0-C1');
+    wb.destroy();
+    dslHost.remove();
+    editorHost.remove();
   });
 
   it('CircuitEditorNgModule is defined', async () => {

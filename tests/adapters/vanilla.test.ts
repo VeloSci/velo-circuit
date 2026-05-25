@@ -27,6 +27,13 @@ describe('vanilla adapter', () => {
     instance.destroy();
   });
 
+  it('mountCircuitEditor mounts with preset lite without global toolbar', () => {
+    const instance = mountCircuitEditor({ container, preset: 'lite', initialDsl: 'R0' });
+    expect(instance.getValue()).toBe('R0');
+    expect(container.querySelector('.ce-toolbar')).toBeNull();
+    instance.destroy();
+  });
+
   it('setValue updates the DSL', () => {
     const instance = mountCircuitEditor({ container });
     instance.setValue('R0-p(R1,C1)');

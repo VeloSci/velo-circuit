@@ -3,7 +3,9 @@ import {
   mountAstroCircuitEditor,
   unmountAstroCircuitEditor,
   getAstroCircuitEditor,
-  createAstroEditorWidget
+  createAstroEditorWidget,
+  mountAstroDslCodeMirror,
+  mountAstroCircuitWorkbench,
 } from '../../src/adapters/astro/index.js';
 
 describe('astro adapter', () => {
@@ -135,5 +137,31 @@ describe('astro adapter', () => {
     editor.redo();
     expect(editor.getValue()).toBe('R0-C1');
     editor.destroy();
+  });
+
+  it('mountAstroDslCodeMirror mounts standalone DSL', () => {
+    const dslHost = document.createElement('div');
+    document.body.appendChild(dslHost);
+    const field = mountAstroDslCodeMirror(dslHost, { initialDsl: 'R0', themeMode: 'dark' });
+    expect(field.getValue()).toBe('R0');
+    expect(dslHost.querySelector('.cm-editor')).toBeTruthy();
+    field.destroy();
+    dslHost.remove();
+  });
+
+  it('mountAstroCircuitWorkbench syncs DSL and lite editor', () => {
+    const dslHost = document.createElement('div');
+    const editorHost = document.createElement('div');
+    document.body.appendChild(dslHost);
+    document.body.appendChild(editorHost);
+    const wb = mountAstroCircuitWorkbench(dslHost, editorHost, {
+      initialDsl: 'R0',
+      editorPreset: 'lite',
+    });
+    wb.setValue('R0-C1');
+    expect(wb.getValue()).toBe('R0-C1');
+    wb.destroy();
+    dslHost.remove();
+    editorHost.remove();
   });
 });

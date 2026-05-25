@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { createSvelteCircuitEditor, getSvelteEditorEvents, circuitEditor } from '../../src/adapters/svelte/index.js';
+import {
+  createSvelteCircuitEditor,
+  getSvelteEditorEvents,
+  circuitEditor,
+  dslCodeMirror,
+  bindCircuitWorkbench,
+} from '../../src/adapters/svelte/index.js';
 
 describe('svelte adapter', () => {
   let container: HTMLElement;
@@ -80,7 +86,7 @@ describe('svelte adapter', () => {
   });
 
   it('getSvelteEditorEvents returns event names', () => {
-    const events = getSvelteEditorEvents(container);
+    const events = getSvelteEditorEvents();
     expect(events).toContain('change');
     expect(events).toContain('error');
   });
@@ -107,6 +113,36 @@ describe('svelte adapter', () => {
   it('destroy cleans up without error', () => {
     const instance = createSvelteCircuitEditor(container, {});
     expect(() => instance.destroy()).not.toThrow();
+  });
+
+  it('dslCodeMirror action mounts standalone field', () => {
+    const dslHost = document.createElement('div');
+    document.body.appendChild(dslHost);
+    const action = dslCodeMirror(dslHost, { initialDsl: 'R0-C1', themeMode: 'dark' });
+    expect(dslHost.querySelector('.cm-editor')).toBeTruthy();
+    action.destroy();
+    dslHost.remove();
+  });
+
+  it('bindCircuitWorkbench syncs DSL and lite editor', () => {
+    const dslHost = document.createElement('div');
+    const editorHost = document.createElement('div');
+    document.body.appendChild(dslHost);
+    document.body.appendChild(editorHost);
+    let latest = '';
+    const wb = bindCircuitWorkbench({
+      dslElement: dslHost,
+      editorElement: editorHost,
+      initialDsl: 'R0',
+      editorPreset: 'lite',
+      onChange: (d) => { latest = d; },
+    });
+    wb.setValue('R0-p(R1,C1)');
+    expect(wb.getValue()).toBe('R0-p(R1,C1)');
+    expect(latest).toBe('R0-p(R1,C1)');
+    wb.destroy();
+    dslHost.remove();
+    editorHost.remove();
   });
 
   it('multiple instances can coexist', () => {
