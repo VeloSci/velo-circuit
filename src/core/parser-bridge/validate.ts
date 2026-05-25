@@ -7,6 +7,11 @@ import { invalidParameterReason } from './physical.js';
 export interface ValidateOptions {
   /** Promote warnings to errors. */
   strict?: boolean;
+  /**
+   * `editor` skips expensive topology scans during typing.
+   * `full` (default) runs all checks for simulate/export.
+   */
+  mode?: 'editor' | 'full';
 }
 
 /**
@@ -40,8 +45,11 @@ export function validate(ast: CircuitNode, options?: ValidateOptions): Validatio
   validateStructure(ast, issues, 'root');
   validateDuplicateIds(ast, issues);
   validateElementParameters(ast, issues);
-  validateDcPath(ast, issues);
-  validateConflictingReactive(ast, issues);
+
+  if (options?.mode !== 'editor') {
+    validateDcPath(ast, issues);
+    validateConflictingReactive(ast, issues);
+  }
 
   return buildResult(issues, options);
 }
