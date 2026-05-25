@@ -8,7 +8,7 @@ import { PluginRegistry } from '../plugins/types.js';
 import type { PanZoomPluginAPI } from '../plugins/pan-zoom.plugin.js';
 import { createElement } from '../domain/circuit.js';
 import { createStore } from '../state/store.js';
-import { createAdapter, assignParamOffsets } from '../parser-bridge/index.js';
+import { createAdapter, assignParamOffsets, buildAstDiagnostics } from '../parser-bridge/index.js';
 import { buildLayout, computeBounds } from '../layout/layout-engine.js';
 import { buildCircuitLayers, collectInvalidElementIds } from '../render-svg/renderer.js';
 import { buildEditorSvgShell } from '../render-svg/infinite-grid.js';
@@ -160,7 +160,7 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
     const viewportWidth = doc.viewport.width > 0 ? doc.viewport.width : DEFAULT_WIDTH;
     const viewportHeight = doc.viewport.height > 0 ? doc.viewport.height : DEFAULT_HEIGHT;
     const showParams = doc.metadata.showParams;
-    const validation = adapter.validate(getCurrentAst());
+    const validation = buildAstDiagnostics(getCurrentAst());
     const invalidIds = collectInvalidElementIds(getCurrentAst());
 
     const layers = buildCircuitLayers(graph, {
@@ -208,7 +208,7 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
     const selection = store.getSelection();
     const graph = rebuildGraph();
     const showParams = doc.metadata.showParams;
-    const validation = adapter.validate(getCurrentAst());
+    const validation = buildAstDiagnostics(getCurrentAst());
     const invalidIds = collectInvalidElementIds(getCurrentAst());
 
     const layers = buildCircuitLayers(graph, {
@@ -377,9 +377,10 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
       const result = adapter.parse(dsl);
       if ('error' in result) {
         emit('error', result.error);
-        if (adapter.getOptions().blockInvalidSetValue) return;
+        return;
       }
-      if ('ast' in result) loadAst(result.ast);
+      loadAst(result.ast);
+      emit('validation', buildAstDiagnostics(getCurrentAst()));
     },
 
     getDocument(): CircuitDocument {
@@ -461,7 +462,7 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
     },
 
     getValidation(): ValidationResult {
-      return validate(getCurrentAst());
+      return buildAstDiagnostics(getCurrentAst());
     },
 
     getElementIds(): string[] {
