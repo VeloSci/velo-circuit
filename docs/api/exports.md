@@ -11,9 +11,9 @@ Published files are under `dist/`. Import paths below match `package.json` `expo
 | `velo-circuit/vanilla` | `mountCircuitEditor`, `mountDslCodeMirror`, `mountCircuitWorkbench`, `createCircuitEditorVanilla` |
 | `velo-circuit/react` | `useCircuitEditor`, `useDslCodeMirror`, `useCircuitWorkbench`, `createReactCircuitEditor` |
 | `velo-circuit/vue` | `useCircuitEditor`, `useDslCodeMirror`, `useCircuitWorkbench`, `createVueCircuitEditor` |
-| `velo-circuit/svelte` | `circuitEditor` action, `createSvelteCircuitEditor` |
-| `velo-circuit/angular` | `createAngularCircuitEditorAdapter`, `CircuitEditorNgModule` |
-| `velo-circuit/astro` | `mountAstroCircuitEditor`, `createAstroEditorWidget` |
+| `velo-circuit/svelte` | `dslCodeMirror`, `circuitEditor`, `bindCircuitWorkbench`, `createSvelteCircuitEditor` |
+| `velo-circuit/angular` | `createAngularCircuitEditorAdapter` (`mount`, `mountDsl`, `mountWorkbench`) |
+| `velo-circuit/astro` | `mountAstroCircuitEditor`, `mountAstroDslCodeMirror`, `mountAstroCircuitWorkbench` |
 
 There is **no** separate `velo-circuit/grid` or `velo-circuit/plugins` subpath — import those from the main entry.
 
