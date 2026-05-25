@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { allPlugins, minimalPlugins } from '../src/core/plugins/index.js';
+import { allPlugins, litePlugins, minimalPlugins, resolvePlugins } from '../src/core/plugins/index.js';
 
 describe('plugins system', () => {
   let container: HTMLElement;
@@ -90,5 +90,25 @@ describe('plugins system', () => {
     expect(names).toContain('dsl-codemirror-panel');
     expect(names).toContain('diagnostics');
     expect(names).toContain('export-panel');
+  });
+
+  it('litePlugins includes in-canvas editing but not global toolbar or side panels', () => {
+    const plugins = litePlugins();
+    const names = plugins.map(p => p.name);
+    expect(names).toContain('element-picker');
+    expect(names).toContain('floating-toolbar');
+    expect(names).toContain('context-menu');
+    expect(names).not.toContain('toolbar');
+    expect(names).not.toContain('dsl-codemirror-panel');
+    expect(names).not.toContain('grid-view');
+    expect(names).not.toContain('export-panel');
+    expect(names).not.toContain('diagnostics');
+  });
+
+  it('resolvePlugins maps preset names to plugin arrays', () => {
+    expect(resolvePlugins('extended').map(p => p.name)).toEqual(allPlugins().map(p => p.name));
+    expect(resolvePlugins('lite').map(p => p.name)).toEqual(litePlugins().map(p => p.name));
+    expect(resolvePlugins('minimal').map(p => p.name)).toEqual(minimalPlugins().map(p => p.name));
+    expect(resolvePlugins().map(p => p.name)).toEqual(allPlugins().map(p => p.name));
   });
 });

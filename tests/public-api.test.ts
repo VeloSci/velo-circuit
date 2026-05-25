@@ -5,6 +5,9 @@ import {
   parseBoukamp,
   buildLayout,
   renderDslPreviewSvg,
+  litePlugins,
+  resolvePlugins,
+  type EditorPreset,
 } from '../src/core/index.js';
 import type { CircuitNode } from '../src/core/domain/circuit.js';
 
@@ -13,6 +16,15 @@ describe('public API exports', () => {
     expect(typeof exportPreviewSvgWithStyles).toBe('function');
     expect(typeof getJunctionHub).toBe('function');
     expect(typeof renderDslPreviewSvg).toBe('function');
+  });
+
+  it('exports editor preset helpers from the package entrypoint', () => {
+    expect(typeof litePlugins).toBe('function');
+    expect(typeof resolvePlugins).toBe('function');
+    const presets: EditorPreset[] = ['minimal', 'lite', 'extended'];
+    for (const preset of presets) {
+      expect(resolvePlugins(preset).length).toBeGreaterThan(0);
+    }
   });
 
   it('getJunctionHub resolves wire convergence for parallel branches', () => {
