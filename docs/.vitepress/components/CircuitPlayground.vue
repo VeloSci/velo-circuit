@@ -9,6 +9,7 @@ import VuePreview from './VuePreview.vue';
 import SveltePreview from './SveltePreview.vue';
 import AngularPreview from './AngularPreview.vue';
 import AstroPreview from './AstroPreview.vue';
+import PlaygroundCircuitPicker from './PlaygroundCircuitPicker.vue';
 
 const props = withDefaults(defineProps<{
   circuits?: CircuitExample[];
@@ -21,8 +22,14 @@ const props = withDefaults(defineProps<{
 });
 
 const { isDark } = useData();
+const circuitsList = computed(() => props.circuits || allPlaygroundCircuits);
+
+function circuitById(id: string) {
+  return circuitsList.value.find(c => c.id === id) ?? circuitsList.value[0];
+}
+
 const activeCircuit = ref(props.initialCircuit || 'randles');
-const dslInput = ref('');
+const dslInput = ref(circuitById(activeCircuit.value)?.dsl ?? '');
 const diagnosticsOutput = ref<{ type: string; message: string }[]>([]);
 const activeTab = ref('preview');
 const framework = ref('react');
@@ -30,8 +37,6 @@ const activePreviewRef = ref<any>(null);
 const showParams = ref(false);
 const strictMode = ref(false);
 const mountPointRef = ref<HTMLElement | null>(null);
-
-const circuitsList = computed(() => props.circuits || allPlaygroundCircuits);
 
 // Map tabs to preview components
 const previewComponents: Record<string, any> = {
@@ -132,23 +137,6 @@ async function updateDiagnostics() {
   }));
 }
 
-function onDslInputChange() {
-  updateDiagnostics();
-  activePreviewRef.value?.setValue(dslInput.value);
-}
-
-function copyDsl() {
-  navigator.clipboard.writeText(dslInput.value).catch(() => {});
-}
-
-function copySvg() {
-  const root = mountPointRef.value ?? document.querySelector('.framework-mount-point');
-  const svg = root?.querySelector('svg.circuit-editor-root, svg.circuit-editor');
-  if (svg) {
-    navigator.clipboard.writeText(svg.outerHTML).catch(() => {});
-  }
-}
-
 function centerView() {
   activePreviewRef.value?.centerView();
 }
@@ -164,14 +152,19 @@ watch(isDark, (val) => {
   });
 }, { immediate: true });
 
-function selectCircuit(circuitId: string) {
-  activeCircuit.value = circuitId;
-  const circuit = circuitsList.value.find(c => c.id === circuitId);
-  if (circuit) {
-    dslInput.value = circuit.dsl;
-    activePreviewRef.value?.setValue(circuit.dsl);
-    updateDiagnostics();
-  }
+function selectCircuit(circuit: CircuitExample) {
+  activeCircuit.value = circuit.id;
+  dslInput.value = circuit.dsl;
+  showParams.value = true;
+  activePreviewRef.value?.setValue(circuit.dsl);
+  activePreviewRef.value?.setShowParams?.(true);
+  activePreviewRef.value?.setStrict?.(strictMode.value);
+  void updateDiagnostics();
+  requestAnimationFrame(() => activePreviewRef.value?.centerView?.());
+}
+
+function onCircuitPickerSelect(circuit: CircuitExample) {
+  selectCircuit(circuit);
 }
 
 function onPreviewDslChange(newDsl: string) {
@@ -180,8 +173,6 @@ function onPreviewDslChange(newDsl: string) {
 }
 
 onMounted(async () => {
-  const circuit = circuitsList.value.find(c => c.id === activeCircuit.value) || circuitsList.value[0];
-  dslInput.value = circuit.dsl;
   await updateDiagnostics();
 });
 </script>
@@ -195,24 +186,6 @@ onMounted(async () => {
         <span class="chrome-dot chrome-dot--green"></span>
       </div>
       <div class="chrome-title">{{ title }}</div>
-    </div>
-
-    <div class="playground-toolbar">
-      <div class="circuit-selector">
-        <span class="toolbar-label">Select Example:</span>
-        <button
-          v-for="circuit in circuitsList"
-          :key="circuit.id"
-          :class="['circuit-btn', { active: activeCircuit === circuit.id }]"
-          @click="selectCircuit(circuit.id)"
-        >
-          {{ circuit.title }}
-        </button>
-        <div style="flex: 1"></div>
-        <button class="circuit-btn" @click="centerView" title="Fit view (SVG)">🎯 Fit</button>
-        <button class="circuit-btn" :class="{ active: showParams }" @click="toggleShowParams">Params</button>
-        <button class="circuit-btn" :class="{ active: strictMode }" @click="toggleStrict">Strict</button>
-      </div>
     </div>
 
     <div class="framework-tabs">
@@ -234,34 +207,16 @@ onMounted(async () => {
       </div>
 
       <div v-show="activeTab !== 'code'" class="playground-canvas">
-        <div class="horizontal-panels">
-          <div class="panel panel-dsl">
-            <div class="panel-header">
-              <span>Boukamp DSL</span>
-              <button class="action-btn" @click="copyDsl">📋</button>
-            </div>
-            <div class="panel-body">
-              <textarea v-model="dslInput" @input="onDslInputChange" class="dsl-textarea" spellcheck="false"></textarea>
-            </div>
-          </div>
-          <div class="panel panel-diag">
-            <div class="panel-header">
-              <span>Diagnostics</span>
-              <span class="diag-count" v-if="diagnosticsOutput.length">{{ diagnosticsOutput.length }}</span>
-            </div>
-            <div class="panel-body">
-              <div v-if="diagnosticsOutput.length === 0" class="diag-empty">✓ OK</div>
-              <div v-for="(d, i) in diagnosticsOutput.slice(0, 2)" :key="i" :class="['diag-item', `diag-${d.type}`]">
-                {{ d.message }}
-              </div>
-            </div>
-          </div>
-          <div class="panel panel-export-wrap">
-            <div class="panel-header">Export</div>
-            <div class="panel-body panel-export">
-              <button class="export-btn" @click="copySvg">SVG</button>
-              <button class="export-btn" @click="copyDsl">DSL</button>
-            </div>
+        <div class="workbench-bar">
+          <PlaygroundCircuitPicker
+            v-model="activeCircuit"
+            :circuits="circuitsList"
+            @select="onCircuitPickerSelect"
+          />
+          <div class="workbench-actions">
+            <button type="button" class="mode-btn" title="Fit view" @click="centerView">🎯 Fit</button>
+            <button type="button" class="mode-btn" :class="{ active: showParams }" @click="toggleShowParams">Params</button>
+            <button type="button" class="mode-btn" :class="{ active: strictMode }" @click="toggleStrict">Strict</button>
           </div>
         </div>
 
@@ -292,77 +247,40 @@ onMounted(async () => {
   min-height: 0;
 }
 
-.horizontal-panels {
-  display: flex;
-  background: var(--vp-c-bg-soft);
-  border-top: 1px solid var(--vp-c-divider);
-  gap: 1px;
-  background: var(--vp-c-divider);
-}
-
-.panel {
-  flex: 1;
-  background: var(--vp-c-bg);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.panel-header {
+.workbench-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 10px;
+  gap: 12px;
+  padding: 8px 12px;
   background: var(--vp-c-bg-soft);
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--vp-c-text-2);
   border-bottom: 1px solid var(--vp-c-divider);
+  flex-shrink: 0;
 }
-
-.panel-body {
-  padding: 6px;
-  flex: 1;
-}
-
-.dsl-textarea {
-  width: 100%;
-  height: 40px;
-  padding: 4px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 11px;
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
-  resize: none;
-}
-
-.diag-item {
-  font-size: 10px;
-  padding: 2px 4px;
-  border-radius: 3px;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.diag-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-.diag-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-
-.panel-export {
+.workbench-actions {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
-.export-btn {
-  flex: 1;
-  padding: 4px;
-  font-size: 10px;
+.mode-btn {
+  padding: 6px 12px;
   border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  border-radius: 4px;
+  background: var(--vp-c-bg);
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  border-radius: 6px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.mode-btn:hover {
+  border-color: var(--vp-c-brand-1);
+}
+.mode-btn.active {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  color: #fff;
 }
 
 .playground-chrome {
@@ -388,40 +306,6 @@ onMounted(async () => {
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
-
-.playground-toolbar {
-  padding: 12px 16px;
-  background: var(--vp-c-bg);
-  border-bottom: 1px solid var(--vp-c-divider);
-}
-
-.circuit-selector {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.toolbar-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--vp-c-text-2);
-  margin-right: 4px;
-}
-
-.circuit-btn {
-  padding: 4px 12px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--vp-c-text-1);
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-.circuit-btn:hover { border-color: var(--vp-c-brand-1); background: var(--vp-c-bg); }
-.circuit-btn.active { background: var(--vp-c-brand-1); border-color: var(--vp-c-brand-1); color: white; }
 
 .framework-tabs {
   display: flex;
@@ -465,7 +349,7 @@ onMounted(async () => {
   width: 100%;
   background: #f0f2f5;
   flex: 1;
-  min-height: 360px;
+  min-height: 0;
   position: relative;
 }
 .dark .framework-mount-point { background: #0f172a; }
