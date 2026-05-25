@@ -4,7 +4,7 @@ layout: home
 hero:
   name: velo-circuit
   text: Framework-agnostic SVG circuit editor for electrochemical impedance spectroscopy
-  tagline: No external dependencies · Pure SVG · TypeScript · 203 tests passing
+  tagline: Pure SVG · TypeScript · Editor presets · Grid & DSL building blocks
   actions:
     - theme: brand
       text: Get Started
@@ -18,8 +18,8 @@ hero:
 
 features:
   - icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"><defs><linearGradient id="gf1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4cc9f0"/><stop offset="100%" style="stop-color:#4361ee"/></linearGradient><filter id="glow1" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><style>@keyframes spin1 { 100% { transform: rotate(360deg); } } @keyframes pulse1 { 50% { transform: scale(1.2); opacity: 0.8; } } .spin { transform-origin: 32px 32px; animation: spin1 10s linear infinite; } .pulse { transform-origin: 32px 32px; animation: pulse1 3s ease-in-out infinite; }</style></defs><path d="M 0 32 Q 16 16 32 32 T 64 32" stroke="url(#gf1)" stroke-width="1" opacity="0.2" fill="none"/><circle cx="32" cy="32" r="26" stroke="url(#gf1)" stroke-width="2" opacity="0.3"/><g class="spin"><circle cx="32" cy="32" r="18" stroke="url(#gf1)" stroke-width="2" stroke-dasharray="4 6" filter="url(#glow1)"/></g><circle cx="32" cy="32" r="6" fill="#4cc9f0" class="pulse" filter="url(#glow1)"/><circle cx="32" cy="32" r="2" fill="#fff"/></svg>'
-    title: Zero Dependencies
-    details: The core runs without any external runtime dependencies. Only TypeScript and Vitest for development.
+    title: Composable UI
+    details: Extended, lite, and minimal editor presets. Use Grid and DSL CodeMirror standalone or inside the full editor.
   - icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none"><defs><linearGradient id="gf2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#4cc9f0"/><stop offset="100%" style="stop-color:#4361ee"/></linearGradient><filter id="glow2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><style>@keyframes float2 { 50% { transform: translateY(-4px); } } .float { animation: float2 4s ease-in-out infinite; }</style></defs><path d="M 10 60 L 20 10 L 60 10" stroke="url(#gf2)" stroke-width="1" opacity="0.2" fill="none"/><g class="float"><rect x="8" y="16" width="48" height="36" rx="4" stroke="url(#gf2)" stroke-width="2.5" fill="#0b1120"/><path d="M8 26h48" stroke="url(#gf2)" stroke-width="1.5" opacity="0.5"/><circle cx="14" cy="21" r="2" fill="#ef4444" filter="url(#glow2)"/><circle cx="20" cy="21" r="2" fill="#f59e0b" filter="url(#glow2)"/><circle cx="26" cy="21" r="2" fill="#22c55e" filter="url(#glow2)"/><path d="M16 40h12 M16 46h24" stroke="url(#gf2)" stroke-width="2" stroke-linecap="round" filter="url(#glow2)"/></g></svg>'
     title: Framework Agnostic
     details: Official adapters for React, Vue, Angular, Astro, Svelte, and Vanilla JS — same API everywhere.
