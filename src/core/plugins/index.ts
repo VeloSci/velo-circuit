@@ -26,7 +26,7 @@ import { toolbarPlugin } from './toolbar.plugin.js';
 import { diagnosticsPlugin, exportPanelPlugin } from './sidebar.plugin.js';
 import { dslCodemirrorPanelPlugin } from './dsl-codemirror.plugin.js';
 
-/** All plugins — full-featured editor */
+/** All plugins — full-featured editor (extended preset) */
 export function allPlugins(): EditorPlugin[] {
   return [
     themePlugin(),
@@ -44,7 +44,20 @@ export function allPlugins(): EditorPlugin[] {
   ];
 }
 
-/** Minimal plugins — just canvas interaction */
+/** Lite plugins — in-canvas editing without global toolbar or side panels */
+export function litePlugins(): EditorPlugin[] {
+  return [
+    themePlugin(),
+    panZoomPlugin(),
+    selectionPlugin(),
+    elementPickerPlugin(),
+    contextMenuPlugin(),
+    floatingToolbarPlugin(),
+    keyboardPlugin(),
+  ];
+}
+
+/** Minimal plugins — just canvas interaction (pan/zoom, selection) */
 export function minimalPlugins(): EditorPlugin[] {
   return [
     themePlugin(),
@@ -52,4 +65,19 @@ export function minimalPlugins(): EditorPlugin[] {
     selectionPlugin(),
     keyboardPlugin(),
   ];
+}
+
+/** Preset names for adapter and app configuration */
+export type EditorPreset = 'minimal' | 'lite' | 'extended';
+
+/** Resolve a preset name to a plugin array (default: extended) */
+export function resolvePlugins(preset: EditorPreset = 'extended'): EditorPlugin[] {
+  switch (preset) {
+    case 'minimal':
+      return minimalPlugins();
+    case 'lite':
+      return litePlugins();
+    case 'extended':
+      return allPlugins();
+  }
 }

@@ -93,8 +93,10 @@ export function themePlugin(): EditorPlugin {
 
       // Setup container structure
       ctx.container.classList.add('ce-editor');
-      // Detect system preference
-      if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+      const preset = ctx.container.dataset.ceThemeMode;
+      if (preset === 'dark' || preset === 'light') {
+        isDark = preset === 'dark';
+      } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
         isDark = true;
       }
       applyTheme();
