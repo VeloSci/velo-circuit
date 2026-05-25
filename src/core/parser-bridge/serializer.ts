@@ -1,4 +1,5 @@
 import type { CircuitNode } from '../domain/circuit.js';
+import { nParams } from '../domain/circuit.js';
 
 export interface SerializeOptions {
   showParams?: boolean;
@@ -6,9 +7,33 @@ export interface SerializeOptions {
   paramFormat?: 'brace' | 'bracket';
 }
 
-function formatParams(params: number[], format: 'brace' | 'bracket'): string {
-  const inner = params.join(',');
+function formatParamValue(v: number): string {
+  if (Math.abs(v) >= 1e4 || (Math.abs(v) > 0 && Math.abs(v) < 1e-3)) {
+    return v.toExponential(4).replace(/e\+?0*/, 'e');
+  }
+  return String(v);
+}
+
+function formatParams(values: (number | null | undefined)[], format: 'brace' | 'bracket'): string {
+  const inner = values
+    .map(v => (v != null && Number.isFinite(v) ? formatParamValue(v) : ''))
+    .join(',');
   return format === 'bracket' ? `[${inner}]` : `{${inner}}`;
+}
+
+function elementParamValues(node: Extract<CircuitNode, { type: 'element' }>): (number | null | undefined)[] {
+  const n = nParams(node.kind);
+  const out: (number | null | undefined)[] = new Array(n).fill(undefined);
+  if (node.embedded) {
+    for (let i = 0; i < n; i++) out[i] = node.embedded[i] ?? null;
+  }
+  if (node.params) {
+    for (let i = 0; i < n; i++) {
+      const v = node.params[i];
+      if (v != null && Number.isFinite(v)) out[i] = v;
+    }
+  }
+  return out;
 }
 
 export function serialize(ast: CircuitNode, options?: SerializeOptions): string {
@@ -17,8 +42,11 @@ export function serialize(ast: CircuitNode, options?: SerializeOptions): string 
   switch (ast.type) {
     case 'element': {
       let str = `${ast.kind}${ast.id}`;
-      if (options?.showParams && ast.params && ast.params.length > 0) {
-        str += formatParams(ast.params, paramFormat);
+      if (options?.showParams) {
+        const values = elementParamValues(ast);
+        if (values.some(v => v != null && Number.isFinite(v as number)) || values.some(v => v === null)) {
+          str += formatParams(values, paramFormat);
+        }
       }
       return str;
     }

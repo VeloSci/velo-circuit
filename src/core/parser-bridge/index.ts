@@ -5,6 +5,7 @@ import { parseBoukamp } from './parser.js';
 import { serialize } from './serializer.js';
 import { validate, validateParameterValues } from './validate.js';
 import { ElementRegistry, parameterCount } from './element-registry.js';
+import { buildAstDiagnostics } from './diagnostics-builder.js';
 
 export interface StrictOptions {
   strict?: boolean;
@@ -16,6 +17,7 @@ export interface ParseOutput {
   ast: CircuitNode;
   dsl: string;
   diagnostics: ValidationResult;
+  editorDiagnostics?: import('../domain/diagnostics.js').Diagnostic[];
 }
 
 export interface CircuitParserAdapter {
@@ -61,26 +63,14 @@ export function createAdapter(initialOptions?: StrictOptions): CircuitParserAdap
       }
 
       const ast = result as CircuitNode;
-      const registry = ElementRegistry.fromCircuit(ast);
-      const flatParams = registry.flatParamVector(ast);
-      const diagnostics = flatParams.length > 0
-        ? validateParameterValues(ast, flatParams, { strict: options.strict })
-        : validate(ast, { strict: options.strict });
+      const built = buildAstDiagnostics(ast);
+      const diagnostics: ValidationResult = {
+        issues: built.issues,
+        hasErrors: built.hasErrors,
+        hasWarnings: built.hasWarnings,
+      };
 
-      if (options.blockInvalidSetValue && diagnostics.hasErrors) {
-        return {
-          error: {
-            type: 'parse',
-            position: 0,
-            expected: 'valid circuit',
-            found: dsl,
-            message: diagnostics.issues.find(i => i.type === 'error')?.message ?? 'Validation failed',
-          },
-          diagnostics,
-        };
-      }
-
-      return { ast, dsl, diagnostics };
+      return { ast, dsl, diagnostics, editorDiagnostics: built.diagnostics };
     },
     serialize(ast: CircuitNode, serializeOpts?: { showParams?: boolean }): string {
       return serialize(ast, { showParams: serializeOpts?.showParams, paramFormat: 'brace' });
@@ -96,6 +86,9 @@ export function createAdapter(initialOptions?: StrictOptions): CircuitParserAdap
   };
 }
 
+export { resolveCircuitParams, formatMissingParams } from './resolve-params.js';
+export type { ResolveParamsResult, MissingElementParams, ParamSource } from './resolve-params.js';
+export { buildAstDiagnostics, issuesToDiagnostics, missingToIssues } from './diagnostics-builder.js';
 export { parseBoukamp } from './parser.js';
 export { serialize } from './serializer.js';
 export { validate, validateParameterValues, applyStrictMode, invalidParameterReason } from './validate.js';

@@ -206,24 +206,30 @@ class Parser {
     return { type: 'parallel', children: branches };
   }
 
-  private parseEmbeddedParams(): number[] | undefined {
+  private parseEmbeddedParams(): (number | null)[] | undefined {
     const open = this.peek()?.type;
     if (open !== 'lbracket' && open !== 'lbrace') return undefined;
 
     const closeType = open === 'lbracket' ? 'rbracket' : 'rbrace';
-    const openLabel = open === 'lbracket' ? '[' : '{';
     const closeLabel = open === 'lbracket' ? ']' : '}';
 
     this.consume();
-    const params: number[] = [];
+    const params: (number | null)[] = [];
 
-    while (this.peek()?.type !== closeType) {
-      const numTok = this.expectType('number', 'Expected number for parameter value');
-      params.push(parseFloat(numTok.value));
-
-      if (this.peek()?.type === 'comma') {
+    while (this.peek() && this.peek()!.type !== closeType) {
+      const tok = this.peek()!;
+      if (tok.type === 'number') {
         this.consume();
-      } else if (this.peek()?.type !== closeType) {
+        params.push(parseFloat(tok.value));
+      } else if (tok.type === 'comma') {
+        this.consume();
+        if (
+          this.peek()?.type === 'comma'
+          || this.peek()?.type === closeType
+        ) {
+          params.push(null);
+        }
+      } else {
         break;
       }
     }
@@ -238,12 +244,37 @@ class Parser {
 
     const kind = kindFromCode(codeTok.value);
     const id = parseInt(idTok.value, 10);
-    const params = this.parseEmbeddedParams();
+    const spanStart = codeTok.position;
+    const embedded = this.parseEmbeddedParams();
+    const spanEnd = embedded != null
+      ? (this.tokens[this.pos - 1]?.position ?? idTok.position) + 1
+      : idTok.position + idTok.value.length;
     const paramOffset = this.nextOffset;
     this.nextOffset += nParams(kind);
 
-    return { type: 'element', kind, id, paramOffset, params };
+    const paramsFromEmbedded = embedded
+      ? embedded.filter((v): v is number => v != null && Number.isFinite(v))
+      : undefined;
+
+    return {
+      type: 'element',
+      kind,
+      id,
+      paramOffset,
+      embedded,
+      params: paramsFromEmbedded?.length ? embeddedToFilled(embedded!, nParams(kind)) : undefined,
+      span: { start: spanStart, end: spanEnd },
+    };
   }
+}
+
+function embeddedToFilled(embedded: (number | null)[], n: number): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const v = embedded[i];
+    out.push(v != null && Number.isFinite(v) ? v : Number.NaN);
+  }
+  return out;
 }
 
 export function parseBoukamp(input: string): ParseResult {
