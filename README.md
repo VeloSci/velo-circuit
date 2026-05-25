@@ -129,7 +129,7 @@ pnpm release:prepare -- 1.0.0
 What it does:
 
 - runs `typecheck`, `test`, and `build`
-- bumps `package.json` and `package-lock.json` to the provided version
+- bumps `package.json` (and lockfile) to the provided version, or skips if already set
 - creates commit `chore(release): vX.Y.Z`
 - creates tag `vX.Y.Z`
 - pushes branch and tag to GitHub

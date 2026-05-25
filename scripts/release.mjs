@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { readFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import process from 'node:process';
 
@@ -21,12 +22,41 @@ function parseArgs(argv) {
   };
 }
 
+function readPackageVersion() {
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  return pkg.version;
+}
+
 function assertCleanTree() {
   const status = getOutput('git status --porcelain');
   if (status.length > 0) {
     throw new Error(
       'Working tree is not clean. Commit or stash changes before running release:prepare.'
     );
+  }
+}
+
+function bumpVersionIfNeeded(targetVersion) {
+  const current = readPackageVersion();
+  if (current === targetVersion) {
+    console.log(`package.json already at v${targetVersion}; skipping version bump.`);
+    return;
+  }
+  run(`pnpm version ${targetVersion} --no-git-tag-version`);
+}
+
+function stageLockfiles() {
+  run('git add package.json');
+  if (existsSync('pnpm-lock.yaml')) run('git add pnpm-lock.yaml');
+  if (existsSync('package-lock.json')) run('git add package-lock.json');
+}
+
+function tagExists(version) {
+  try {
+    getOutput(`git rev-parse v${version}`);
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -46,13 +76,26 @@ function main() {
     run('pnpm build');
   }
 
-  run(`npm version ${version} --no-git-tag-version`);
-  run('git add package.json package-lock.json');
-  run(`git commit -m "chore(release): v${version}"`);
-  run(`git tag v${version}`);
+  const current = readPackageVersion();
+  const needsCommit = current !== version;
+
+  bumpVersionIfNeeded(version);
+
+  if (needsCommit) {
+    stageLockfiles();
+    run(`git commit -m "chore(release): v${version}"`);
+  } else {
+    console.log('No version bump commit needed.');
+  }
+
+  if (tagExists(version)) {
+    console.log(`Tag v${version} already exists; skipping tag creation.`);
+  } else {
+    run(`git tag v${version}`);
+  }
 
   if (!skipPush) {
-    run('git push');
+    if (needsCommit) run('git push');
     run(`git push origin v${version}`);
   }
 
