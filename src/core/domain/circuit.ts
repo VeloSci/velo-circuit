@@ -118,7 +118,19 @@ export interface ParallelNode {
 }
 
 export type CircuitNode =
-  | { type: 'element'; kind: ElementKind; id: number; paramOffset: number; params?: number[]; kindIds?: Partial<Record<ElementKind, number>> }
+  | {
+      type: 'element';
+      kind: ElementKind;
+      id: number;
+      paramOffset: number;
+      /** Visual-editor parameter overrides. */
+      params?: number[];
+      /** Values parsed from inline `{...}` / `[...]` in the current DSL. */
+      embedded?: (number | null)[];
+      /** Source span in the DSL string (byte offsets). */
+      span?: { start: number; end: number };
+      kindIds?: Partial<Record<ElementKind, number>>;
+    }
   | SeriesNode
   | ParallelNode;
 

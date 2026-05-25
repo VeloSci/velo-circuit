@@ -8,6 +8,7 @@ export type ValidationErrorKind =
   | 'single-branch-parallel'
   | 'dangling-element'
   | 'parameter-count'
+  | 'missing-params'
   | 'invalid-parameters'
   | 'syntax-error';
 

@@ -71,7 +71,7 @@ export function emptyMetadata(): DocumentMetadata {
     version: 1,
     createdAt: now,
     modifiedAt: now,
-    showParams: false,
+    showParams: true,
     strict: false,
     viewMode: 'circuit',
   };
