@@ -53,6 +53,12 @@ editor.setValue('R0-p(R1,Q1)-Wo2')  // CPE instead of C
 
 See also [Randles circuit](/examples/randles-circuit) and [CPE and complex elements](/examples/cpe-and-complex) for rendered diagrams.
 
+## API
+
+- [Render API](/api/render) — `renderDslPreviewSvg`
+- [Element Types](/reference/element-types)
+
+
 ## Next
 
 - [Gerischer element](/examples/gerischer)

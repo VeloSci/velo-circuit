@@ -33,6 +33,10 @@ editor.mount(document.getElementById('canvas'), {
 })
 ```
 
+## API
+
+- [Render API](/api/render) · [Element Types](/reference/element-types)
+
 ## Related
 
 - [Warburg elements](/examples/warburg-elements) — shared diffusion stroke family

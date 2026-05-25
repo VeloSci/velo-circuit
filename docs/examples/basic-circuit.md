@@ -78,6 +78,12 @@ const result = editor.getValidation()
 console.log(result.hasErrors) // false
 ```
 
+## API
+
+- Static SVG: `renderDslPreviewSvg('R0-C1', { themeMode: 'dark' })` — [Render API](/api/render)
+- Editor: `preset: 'extended' | 'lite'` — [Editor Presets](/guide/editor-presets)
+- DSL field: [DSL Editor API](/api/dsl-editor)
+
 ## Next
 
 [Build a Randles circuit](/examples/randles-circuit)

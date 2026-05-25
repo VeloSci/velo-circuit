@@ -33,6 +33,10 @@ editor.setValue('R0-p(Q1,R2-Pdw3{1e-8,1e-9,0.5,1e-3})')
 
 The SVG symbol uses **forked parallel diagonals** (outline, diffusion strokes at 1.15×).
 
+## API
+
+- [Render API](/api/render) · [Element Types](/reference/element-types)
+
 ## Related
 
 - [Element types: Pdw](/reference/element-types#parallel-diffusion-warburg-pdw)

@@ -68,6 +68,12 @@ editor.setValue('R0-p(R1,Q1)-Wo2')
 
 The CPE element `Q` models non-ideal capacitive behavior with a fractional exponent `n`.
 
+## API
+
+- [Render API](/api/render) — `renderDslPreviewSvg`
+- [Element Types](/reference/element-types)
+
+
 ## Next
 
 [Explore Warburg elements](/examples/warburg-elements)

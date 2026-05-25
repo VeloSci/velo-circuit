@@ -67,6 +67,12 @@ R0-p(R1,C1)-p(R2,Q2)
 
 <CircuitSvgPreview dsl="R0-p(R1,C1)-p(R2,Q2)" />
 
+## API
+
+- [Render API](/api/render) — `renderDslPreviewSvg`
+- [Element Types](/reference/element-types)
+
+
 ## Next
 
 [Model CPE and complex elements](/examples/cpe-and-complex)

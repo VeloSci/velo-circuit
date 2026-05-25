@@ -40,6 +40,10 @@ editor.setValue('CC1{50,1e-3,0.8}')
 
 Validation enforces R, τ > 0; 0.3 ≤ α ≤ 1.0; for HN, 0 ≤ β ≤ 1.0.
 
+## API
+
+- [Render API](/api/render) · [Element Types](/reference/element-types)
+
 ## Related
 
 - [Element types: CC / HN](/reference/element-types)

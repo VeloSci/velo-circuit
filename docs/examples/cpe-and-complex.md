@@ -63,6 +63,12 @@ result.issues.forEach(issue => {
 })
 ```
 
+## API
+
+- [Render API](/api/render) — `renderDslPreviewSvg`
+- [Element Types](/reference/element-types)
+
+
 ## Next
 
 [API Reference](/api/core)
