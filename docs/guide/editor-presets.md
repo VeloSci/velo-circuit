@@ -52,16 +52,18 @@ import { createEditor, minimalPlugins } from 'velo-circuit'
 createEditor({ plugins: minimalPlugins() }).mount(host)
 ```
 
-## React / Vue composition
+## Composition by framework
 
-| Goal | React hook |
-|------|------------|
-| DSL en cualquier `<div>` | `useDslCodeMirror({ value, onChange, themeMode })` |
-| Canvas lite solo | `useCircuitEditor({ preset: 'lite', value, onChange })` |
-| Todo junto (un solo `value`) | `useCircuitWorkbench({ value, onChange, editorPreset: 'lite' })` |
-| Extended integrado | `useCircuitEditor({ preset: 'extended' })` |
+| Goal | React | Vue | Svelte | Angular | Astro |
+|------|-------|-----|--------|---------|-------|
+| DSL solo | `useDslCodeMirror` | `useDslCodeMirror` | `use:dslCodeMirror` | `adapter.mountDsl` | `mountAstroDslCodeMirror` |
+| Canvas lite | `useCircuitEditor({ preset: 'lite' })` | `useCircuitEditor` | `use:circuitEditor` | `adapter.mount` | `mountAstroCircuitEditor` |
+| DSL + lite sync | `useCircuitWorkbench` | `useCircuitWorkbench` | `bindCircuitWorkbench` | `adapter.mountWorkbench` | `mountAstroCircuitWorkbench` |
+| Extended | `useCircuitEditor({ preset: 'extended' })` | same | `use:circuitEditor` | `adapter.mount` | `mountAstroCircuitEditor` |
 
-Vanilla: `mountDslCodeMirror`, `mountCircuitEditor`, `mountCircuitWorkbench`. Details: [React adapter](/adapters/react).
+Vanilla: `mountDslCodeMirror`, `mountCircuitEditor`, `mountCircuitWorkbench` from `velo-circuit/vanilla`.
+
+Details: [Adapters overview](/adapters/) · [React](/adapters/react) · [Svelte](/adapters/svelte) · [Angular](/adapters/angular) · [Astro](/adapters/astro).
 
 ## Building blocks outside presets
 
