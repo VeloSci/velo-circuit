@@ -1,7 +1,22 @@
-import { createEditor, type EditorInstance, type EditorOptions, allPlugins } from '../../core/index.js';
+import { createEditor, type EditorOptions } from '../../core/index.js';
+import { resolvePlugins, type EditorPreset } from '../shared.js';
+import type { ThemeMode } from '../../core/render-svg/themes.js';
+
+export type { EditorPreset } from '../shared.js';
+export {
+  mountDslCodeMirror,
+  mountCircuitWorkbench,
+  type VanillaDslFieldOptions,
+  type VanillaDslFieldInstance,
+  type VanillaWorkbenchOptions,
+  type VanillaWorkbenchInstance,
+} from './workbench.js';
 
 export interface VanillaEditorOptions extends EditorOptions {
   container: HTMLElement;
+  /** Editor UI preset: `extended` (default), `lite`, or `minimal` */
+  preset?: EditorPreset;
+  themeMode?: ThemeMode;
 }
 
 export interface VanillaEditorInstance {
@@ -18,10 +33,10 @@ export interface VanillaEditorInstance {
 }
 
 export function mountCircuitEditor(options: VanillaEditorOptions): VanillaEditorInstance {
-  const { container, ...editorOptions } = options;
-  const editor = createEditor({ plugins: allPlugins() });
+  const { container, preset = 'extended', themeMode, ...editorOptions } = options;
+  const editor = createEditor({ plugins: resolvePlugins(preset) });
 
-  editor.mount(container, editorOptions);
+  editor.mount(container, { ...editorOptions, themeMode });
 
   return {
     destroy(): void {
