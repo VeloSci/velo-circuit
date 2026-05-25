@@ -20,56 +20,56 @@ export interface CircuitExample {
 export const basicCircuit: CircuitExample = {
   id: 'basic',
   title: 'Basic RC',
-  description: 'A simple resistor in series with a parallel RC branch',
-  dsl: 'R0-p(R1,C1)',
+  description: 'Series resistor and capacitor',
+  dsl: 'R0{100}-C1{1e-5}',
   elements: ['R', 'C'],
 };
 
 export const randlesCircuit: CircuitExample = {
   id: 'randles',
   title: 'Randles Circuit',
-  description: 'Classic Randles circuit: solution resistance + charge transfer with double-layer capacitance',
-  dsl: 'R0-p(R1,C1)-Wo2',
+  description: 'Solution resistance + charge transfer + double-layer capacitance + Warburg',
+  dsl: 'R0{10}-p(R1{100},C1{1e-5})-Wo2{0.05,0.1}',
   elements: ['R', 'C', 'Wo'],
 };
 
 export const warburgCircuit: CircuitExample = {
   id: 'warburg',
   title: 'Warburg Short',
-  description: 'Circuit with finite Warburg (short) for diffusion through thin layer',
-  dsl: 'R0-p(R1,C1)-Ws2',
+  description: 'Randles with finite-length Warburg (Ws)',
+  dsl: 'R0{10}-p(R1{100},C1{1e-5})-Ws2{0.01,0.5}',
   elements: ['R', 'C', 'Ws'],
 };
 
 export const nestedCircuit: CircuitExample = {
   id: 'nested',
   title: 'Nested Parallel',
-  description: 'Nested parallel groups demonstrating complex circuit topology',
-  dsl: 'R0-p(R1,p(R2,C1))',
+  description: 'Nested parallel groups demonstrating complex topology',
+  dsl: 'R0{10}-p(R1{50},p(R2{100},C1{1e-6}))',
   elements: ['R', 'C'],
 };
 
 export const cpeCircuit: CircuitExample = {
   id: 'cpe',
   title: 'CPE Circuit',
-  description: 'Circuit with Constant Phase Element for non-ideal capacitive behavior',
-  dsl: 'R0-p(R1,Q1)-Wo2',
-  elements: ['R', 'Q', 'Wo'],
+  description: 'Constant Phase Element in parallel with charge-transfer resistance',
+  dsl: 'R0{50}-p(R1{200},Q1{5e-5,0.82})',
+  elements: ['R', 'Q'],
 };
 
 export const fullRandlesCircuit: CircuitExample = {
   id: 'full-randles',
   title: 'Full Randles + CPE',
-  description: 'Extended Randles model with CPE branch and inductor',
-  dsl: 'R0-p(R1,C1)-p(R2,Q2)-L3',
+  description: 'Dual RC/CPE branches plus series inductor',
+  dsl: 'R0{5}-p(R1{30},C1{1e-5})-p(R2{20},Q2{5e-4,0.82})-L3{1e-3}',
   elements: ['R', 'C', 'Q', 'L'],
 };
 
 export const multiWarburgCircuit: CircuitExample = {
   id: 'multi-warburg',
   title: 'Multi-Warburg',
-  description: 'Circuit comparing different Warburg element types',
-  dsl: 'R0-p(R1,C1)-W2',
+  description: 'Parallel RC with semi-infinite Warburg (W)',
+  dsl: 'R0{10}-p(R1{100},C1{1e-5})-W1{0.05}',
   elements: ['R', 'C', 'W'],
 };
 
