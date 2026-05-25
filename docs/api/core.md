@@ -128,3 +128,41 @@ const hub = getJunctionHub(junctionNode, graph)
 ```
 
 See [Static SVG Rendering](/guide/static-rendering) and [Render API](/api/render).
+
+## Parser adapter
+
+```ts
+import { createAdapter, type StrictOptions } from 'velo-circuit'
+
+const adapter = createAdapter({ strict: true })
+const { ast, dsl, diagnostics } = adapter.parse('R0-C1')
+adapter.setOptions({ validateParamsOnEdit: true })
+```
+
+## Parameter resolution
+
+When parameters are not embedded in the DSL string:
+
+```ts
+import { resolveCircuitParams, formatMissingParams } from 'velo-circuit'
+
+const { values, missing } = resolveCircuitParams(ast, externalParams)
+const message = formatMissingParams(missing)
+```
+
+## Editor presets (re-exported)
+
+```ts
+import { allPlugins, litePlugins, minimalPlugins, resolvePlugins, type EditorPreset } from 'velo-circuit'
+```
+
+See [Plugins API](/api/plugins) and [Editor Presets](/guide/editor-presets).
+
+## Related modules
+
+| Module | Doc |
+|--------|-----|
+| Editor | [Editor API](/api/editor) |
+| Grid | [Grid API](/api/grid) |
+| DSL field | [DSL Editor API](/api/dsl-editor) |
+| Exports map | [Package Exports](/api/exports) |

@@ -73,6 +73,48 @@ const result = validate(ast)
 
 Use `validateParameterValues(ast, params)` when a flat parameter vector is supplied separately from the DSL.
 
+### Validate modes
+
+```ts
+validate(ast, { strict: true, mode: 'editor' })  // lighter checks while typing
+validate(ast, { strict: true, mode: 'full' })   // full topology / DC path checks
+```
+
+## createAdapter
+
+Stateful parser with configurable strictness:
+
+```ts
+import { createAdapter, type StrictOptions } from 'velo-circuit'
+
+const adapter = createAdapter({
+  strict: true,
+  blockInvalidSetValue: true,
+  validateParamsOnEdit: true,
+})
+
+const out = adapter.parse('R0-C1')
+adapter.validate(ast)
+```
+
+## resolveCircuitParams
+
+```ts
+import { resolveCircuitParams, formatMissingParams } from 'velo-circuit'
+
+const { values, missing } = resolveCircuitParams(ast, paramVector)
+if (missing.length) console.warn(formatMissingParams(missing))
+```
+
+## ElementRegistry
+
+```ts
+import { ElementRegistry, assignParamOffsets, parameterCount } from 'velo-circuit'
+
+const registry = ElementRegistry.fromCircuit(ast)
+const names = registry.paramNames()
+```
+
 ## Error Types
 
 ```ts
@@ -100,3 +142,9 @@ const ast = parseBoukamp(dsl)
 const output = serialize(ast)
 assert(output === dsl) // true for valid input without embedded params reordering
 ```
+
+## Related
+
+- [Boukamp Syntax](/reference/boukamp-syntax)
+- [DSL Editor API](/api/dsl-editor)
+- [Core API](/api/core)
