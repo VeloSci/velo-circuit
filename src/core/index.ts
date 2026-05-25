@@ -17,7 +17,20 @@ export { createCircuitGrid, importSpectrozCatalog, type CircuitGridOptions, type
 export { DEFAULT_THEME, DARK_THEME, getTheme, toggleTheme, buildThemeCSS, buildPreviewThemeCSS, buildElementStrokeCSS, ELEMENT_STROKE_COLORS, type RenderTheme, type ThemeColors, type ThemeMode, type SymbolColorMode, type ThemeCSSOptions } from './render-svg/index.js';
 export { createViewportController, parseWheelZoom, parsePointerPan, getZoomLevelLabel, type ViewportController } from './render-svg/index.js';
 export { buildEquationEditorHTML, buildEquationEditorCSS, astToChips, attachEquationEditorEvents, type EquationEditorConfig } from './editor/dsl-equation-editor.js';
+export {
+  createDslCodeMirror,
+  clearElementSymbolIconCache,
+  type DslCodeMirrorOptions,
+  type DslCodeMirrorHandle,
+  type DslCodeMirrorTheme,
+} from './editor/dsl-codemirror.js';
 export { buildContextMenuHTML, buildContextMenuCSS } from './editor/interaction.js';
 export type { ParseError } from './parser-bridge/parser.js';
-export { allPlugins, minimalPlugins } from './plugins/index.js';
+export {
+  allPlugins,
+  litePlugins,
+  minimalPlugins,
+  resolvePlugins,
+  type EditorPreset,
+} from './plugins/index.js';
 export type { EditorPlugin, PluginContext } from './plugins/types.js';
