@@ -1,4 +1,4 @@
-import { EditorState, type Extension } from '@codemirror/state';
+import { EditorState, Compartment, ChangeSet, type Extension } from '@codemirror/state';
 import {
   EditorView,
   keymap,
@@ -7,97 +7,111 @@ import {
   highlightActiveLine,
 } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-import { linter, lintGutter, type Diagnostic as LintDiagnostic } from '@codemirror/lint';
+import { linter, type Diagnostic as LintDiagnostic } from '@codemirror/lint';
 import {
   autocompletion,
   completionKeymap,
-  type CompletionContext,
-  type CompletionResult,
+  startCompletion,
 } from '@codemirror/autocomplete';
-import type { CircuitNode } from '../domain/circuit.js';
 import type { Diagnostic } from '../domain/diagnostics.js';
-import { nParams, elementKindFromCode } from '../domain/circuit.js';
-import { parseBoukamp } from '../parser-bridge/parser.js';
-import { buildAstDiagnostics } from '../parser-bridge/diagnostics-builder.js';
-import { generateNextElementId } from './commands-builder.js';
+import { lintDslDocument } from '../parser-bridge/editor-validate.js';
+import { dslCompletionSource, type DslCompletion } from './dsl-completion.js';
+import { buildAutocompleteThemeExtension } from './dsl-autocomplete-theme.js';
+import { createElementSymbolIcon, clearElementSymbolIconCache, elementKindFromCode } from './element-symbol-icon.js';
+import { nParams } from '../domain/circuit.js';
+import type { ThemeMode } from '../render-svg/themes.js';
+import type {
+  DslCodeMirrorOptions,
+  DslCodeMirrorHandle,
+  DslCodeMirrorTheme,
+} from './dsl-editor-types.js';
 
-const ELEMENT_CODES = ['Pdw', 'Ws', 'Wo', 'CC', 'HN', 'R', 'C', 'L', 'Q', 'W', 'G'];
+export type { DslCodeMirrorOptions, DslCodeMirrorHandle, DslCodeMirrorTheme } from './dsl-editor-types.js';
 
-export interface DslCodeMirrorOptions {
-  parent: HTMLElement;
-  initialValue: string;
-  getAst: () => CircuitNode;
-  onChange: (value: string) => void;
-  onDiagnostics?: (diagnostics: Diagnostic[]) => void;
-}
+const LINT_DELAY_MS = 250;
 
-export interface DslCodeMirrorHandle {
-  setValue(text: string): void;
-  getValue(): string;
-  destroy(): void;
-  focus(): void;
-}
+function buildThemeExtension(theme?: DslCodeMirrorTheme): Extension {
+  const bg = theme?.bg ?? 'var(--ce-bg, #ffffff)';
+  const text = theme?.text ?? 'var(--ce-text, #1e293b)';
+  const border = theme?.border ?? 'var(--ce-border, #e2e8f0)';
+  const accent = theme?.accent ?? 'var(--ce-accent, #3b82f6)';
+  const accentAlpha = theme?.accentAlpha ?? 'var(--ce-accent-alpha, rgba(59,130,246,0.2))';
+  const minH = theme?.minHeight ?? '72px';
+  const mono = theme?.fontMono ?? 'var(--ce-font-mono, ui-monospace, monospace)';
+  const selection = theme?.selection ?? 'var(--ce-accent-alpha, rgba(59,130,246,0.25))';
+  const activeLine = theme?.activeLine ?? 'var(--ce-hover, rgba(59,130,246,0.06))';
 
-function nParamsFromCode(code: string): number {
-  const kind = elementKindFromCode(code);
-  return kind ? nParams(kind) : 1;
-}
-
-function paramTemplate(n: number): string {
-  if (n <= 1) return '{}';
-  return `{${','.repeat(n - 1)}}`;
-}
-
-function createDslLinter(): Extension {
-  return linter(view => {
-    const text = view.state.doc.toString();
-    if (!text.trim()) return [];
-
-    const parsed = parseBoukamp(text);
-    if ('type' in parsed && (parsed.type === 'lex' || parsed.type === 'parse')) {
-      const from = parsed.position;
-      return [{
-        from,
-        to: Math.min(from + 1, text.length),
-        severity: 'error',
-        message: parsed.message,
-      }];
-    }
-
-    const built = buildAstDiagnostics(parsed as CircuitNode);
-    return built.diagnostics.map(d => ({
-      from: d.startOffset,
-      to: Math.max(d.endOffset, d.startOffset + 1),
-      severity: 'error' as const,
-      message: d.issue.message,
-    }));
+  return EditorView.theme({
+    '&': {
+      fontSize: '13px',
+      fontFamily: mono,
+      border: `1px solid ${border}`,
+      borderRadius: '6px',
+      backgroundColor: bg,
+      color: text,
+    },
+    '.cm-scroller': {
+      minHeight: minH,
+      overflow: 'auto',
+    },
+    '.cm-content': {
+      minHeight: minH,
+      padding: '8px 10px',
+      color: text,
+      caretColor: accent,
+      fontFamily: mono,
+    },
+    '.cm-line': {
+      padding: '0 1px',
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftWidth: '2px',
+      borderLeftColor: accent,
+      marginLeft: '-1px',
+    },
+    '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
+      backgroundColor: `${selection} !important`,
+    },
+    '.cm-activeLine': {
+      backgroundColor: activeLine,
+    },
+    '.cm-gutters': {
+      display: 'none',
+    },
+    '.cm-placeholder': {
+      color: 'var(--ce-text-secondary, #94a3b8)',
+      fontStyle: 'italic',
+    },
+    '&.cm-focused': {
+      outline: 'none',
+      borderColor: accent,
+      boxShadow: `0 0 0 3px ${accentAlpha}`,
+    },
   });
 }
 
-function dslCompletions(context: CompletionContext, getAst: () => CircuitNode): CompletionResult | null {
-  const word = context.matchBefore(/(?:Pdw|Ws|Wo|CC|HN|[RCGLQWG])?/);
-  if (!word || word.from === word.to) return null;
-
-  const partial = word.text;
-  const options = ELEMENT_CODES
-    .filter(code => code.startsWith(partial))
-    .map(code => {
-      const kind = elementKindFromCode(code);
-      const nextId = kind != null ? generateNextElementId(getAst(), kind) : 0;
-      const template = paramTemplate(nParamsFromCode(code));
-      const label = `${code}${nextId}${template}`;
-      return {
-        label,
-        type: 'keyword' as const,
-        apply: label,
-      };
-    });
-
-  if (options.length === 0) return null;
-  return { from: word.from, options, validFor: /^(?:Pdw|Ws|Wo|CC|HN|[RCGLQWG]\d*)$/ };
+function createDslLinter(onDiagnostics?: (diagnostics: Diagnostic[]) => void): Extension {
+  return linter(view => {
+    const text = view.state.doc.toString();
+    const result = lintDslDocument(text);
+    if (onDiagnostics && result.parse && !('type' in result.parse)) {
+      onDiagnostics(result.diagnostics.map(d => ({
+        id: `lint-${d.from}`,
+        issue: { type: 'error' as const, kind: 'invalid-parameters' as const, message: d.message },
+        startOffset: d.from,
+        endOffset: d.to,
+      })));
+    }
+    return result.diagnostics.map(d => ({
+      from: d.from,
+      to: d.to,
+      severity: d.severity,
+      message: d.message,
+    })) satisfies readonly LintDiagnostic[];
+  }, { delay: LINT_DELAY_MS });
 }
 
-function paramTabKeymap(getAst: () => CircuitNode): Extension {
+function paramTabKeymap(getAst: DslCodeMirrorOptions['getAst']): Extension {
   return keymap.of([{
     key: 'Tab',
     run(view) {
@@ -108,9 +122,10 @@ function paramTabKeymap(getAst: () => CircuitNode): Extension {
       if (!match) return false;
 
       const code = match[1];
-      const n = nParamsFromCode(code);
-      const template = paramTemplate(n);
-      const insert = template.startsWith('{') ? template : `{${template}}`;
+      const kind = elementKindFromCode(code);
+      const n = kind ? nParams(kind) : 1;
+      const template = n <= 1 ? '{}' : `{${','.repeat(n - 1)}}`;
+      const insert = template;
       const cursorPos = pos + 1;
 
       view.dispatch({
@@ -122,60 +137,64 @@ function paramTabKeymap(getAst: () => CircuitNode): Extension {
   }]);
 }
 
+function buildAutocompletion(themeMode: ThemeMode, getAst: DslCodeMirrorOptions['getAst']): Extension {
+  return autocompletion({
+    override: [dslCompletionSource(getAst)],
+    activateOnTyping: true,
+    maxRenderedOptions: 20,
+    addToOptions: [{
+      position: 0,
+      render(completion) {
+        const c = completion as DslCompletion;
+        if (!c.kindCode) return null;
+        const kind = elementKindFromCode(c.kindCode);
+        if (!kind) return null;
+        return createElementSymbolIcon(kind, themeMode);
+      },
+    }],
+  });
+}
+
 export function createDslCodeMirror(options: DslCodeMirrorOptions): DslCodeMirrorHandle {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
   let suppressChange = false;
+  const themeMode: ThemeMode = options.themeMode ?? 'light';
+
+  const readOnlyCompartment = new Compartment();
+  const editableCompartment = new Compartment();
 
   const extensions: Extension[] = [
     history(),
     drawSelection(),
     highlightActiveLine(),
-    lintGutter(),
-    createDslLinter(),
-    autocompletion({
-      override: [ctx => dslCompletions(ctx, options.getAst)],
+    EditorView.lineWrapping,
+    EditorView.contentAttributes.of({
+      spellcheck: 'false',
+      autocorrect: 'off',
+      autocapitalize: 'off',
     }),
+    createDslLinter(options.onDiagnostics),
+    buildAutocompletion(themeMode, options.getAst),
     paramTabKeymap(options.getAst),
-    keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap]),
-    placeholder('R0-p(R1,C1{1e-9})'),
+    keymap.of([
+      { key: 'Ctrl-Space', run: startCompletion },
+      ...defaultKeymap,
+      ...historyKeymap,
+      ...completionKeymap,
+    ]),
+    placeholder(options.placeholder ?? 'R0-p(R1{100},C1{1e-5})'),
     EditorView.updateListener.of(update => {
       if (!update.docChanged || suppressChange) return;
       const value = update.state.doc.toString();
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         options.onChange(value);
-        const parsed = parseBoukamp(value);
-        if (!('type' in parsed) || (parsed.type !== 'lex' && parsed.type !== 'parse')) {
-          const built = buildAstDiagnostics(parsed as CircuitNode);
-          options.onDiagnostics?.(built.diagnostics);
-        }
       }, 150);
     }),
-    EditorView.theme({
-      '&': {
-        fontSize: '13px',
-        fontFamily: 'var(--ce-font-mono, ui-monospace, monospace)',
-        border: '1px solid var(--ce-border, #ccc)',
-        borderRadius: '6px',
-        backgroundColor: 'var(--ce-bg, #fff)',
-      },
-      '.cm-content': {
-        minHeight: '55px',
-        padding: '8px',
-        caretColor: 'var(--ce-accent, #3b82f6)',
-      },
-      '.cm-gutters': {
-        display: 'none',
-      },
-      '.cm-activeLine': {
-        backgroundColor: 'transparent',
-      },
-      '&.cm-focused': {
-        outline: 'none',
-        borderColor: 'var(--ce-accent, #3b82f6)',
-        boxShadow: '0 0 0 3px var(--ce-accent-alpha, rgba(59,130,246,.2))',
-      },
-    }),
+    buildThemeExtension(options.theme),
+    buildAutocompleteThemeExtension(options.theme, themeMode),
+    readOnlyCompartment.of(EditorState.readOnly.of(!!options.readOnly)),
+    editableCompartment.of(EditorView.editable.of(!options.readOnly)),
   ];
 
   const state = EditorState.create({
@@ -187,9 +206,20 @@ export function createDslCodeMirror(options: DslCodeMirrorOptions): DslCodeMirro
 
   return {
     setValue(text: string) {
+      const doc = view.state.doc;
+      const current = doc.toString();
+      if (text === current) return;
+
+      const sel = view.state.selection.main;
+      const changes = ChangeSet.of([{ from: 0, to: doc.length, insert: text }], doc.length);
+      const anchor = changes.mapPos(sel.anchor, 1);
+      const head = changes.mapPos(sel.head, 1);
+
       suppressChange = true;
       view.dispatch({
-        changes: { from: 0, to: view.state.doc.length, insert: text },
+        changes,
+        selection: { anchor, head },
+        scrollIntoView: true,
       });
       suppressChange = false;
     },
@@ -203,5 +233,18 @@ export function createDslCodeMirror(options: DslCodeMirrorOptions): DslCodeMirro
     focus() {
       view.focus();
     },
+    hasFocus() {
+      return view.hasFocus;
+    },
+    setReadOnly(readOnly: boolean) {
+      view.dispatch({
+        effects: [
+          readOnlyCompartment.reconfigure(EditorState.readOnly.of(readOnly)),
+          editableCompartment.reconfigure(EditorView.editable.of(!readOnly)),
+        ],
+      });
+    },
   };
 }
+
+export { clearElementSymbolIconCache };
