@@ -84,10 +84,10 @@ describe('plugins system', () => {
     expect(picker).toBeDefined();
   });
 
-  it('sidebar plugins (dsl-panel, diagnostics, export-panel) are included', () => {
+  it('sidebar plugins (dsl-codemirror, diagnostics, export-panel) are included', () => {
     const plugins = allPlugins();
     const names = plugins.map(p => p.name);
-    expect(names).toContain('dsl-panel');
+    expect(names).toContain('dsl-codemirror-panel');
     expect(names).toContain('diagnostics');
     expect(names).toContain('export-panel');
   });

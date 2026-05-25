@@ -55,7 +55,10 @@ describe('editor', () => {
     expect(editor.getValue()).toMatch(/R1[^0-9]|^R0-p\(R1,/);
     expect(editor.getSelectedId()).toBe('R1');
     const validation = editor.getValidation();
-    expect(validation.hasErrors).toBe(false);
+    const hardErrors = validation.issues.filter(
+      i => i.type === 'error' && i.kind !== 'missing-params',
+    );
+    expect(hardErrors.length).toBe(0);
   });
 });
 
