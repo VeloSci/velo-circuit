@@ -748,6 +748,32 @@ body::after {
 }
 
 /* ============================================
+   Full-width playground pages
+   pageClass is applied on .Layout (VitePress default theme), not .VPContent
+   ============================================ */
+
+.Layout.full-width-page .VPPage {
+  padding-left: 4px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 960px) {
+  .Layout.full-width-page .VPPage {
+    padding-left: 6px;
+  }
+
+  .Layout.full-width-page .VPContent.has-sidebar {
+    padding-left: calc(var(--vp-sidebar-width) + 4px) !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .Layout.full-width-page .VPContent.has-sidebar {
+    padding-left: calc((100vw - var(--vp-layout-max-width)) / 2 + var(--vp-sidebar-width) + 4px) !important;
+  }
+}
+
+/* ============================================
    Playground Component Styles
    ============================================ */
 
