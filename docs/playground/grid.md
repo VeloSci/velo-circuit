@@ -5,15 +5,9 @@ outline: false
 pageClass: full-width-page
 ---
 
-# Circuit Grid Catalog
-
-Virtualized SVG table: each row shows the **linear DSL** (with `{…}` parameters), a **circuit preview**, and parameter summary.
-
 <SymbolGallery />
 
 <GridPlayground />
 
-## Related
+Standalone API: [Grid API](/api/grid) (`createCircuitGrid`, `importSpectrozCatalog`). The extended editor also embeds this grid via the toolbar **Grid** toggle (`gridViewPlugin`).
 
-- [Editor Playground](/playground/) — interactive SVG editor with pan/zoom and strict mode
-- [Element Types](/reference/element-types) — all 11 Boukamp codes including `CC` and `HN`
