@@ -1,10 +1,10 @@
-import { 
-  createEditor, 
-  type EditorInstance, 
-  type EditorOptions, 
-  type EditorEvent, 
-  allPlugins 
-} from '../../core/index.js';
+import { createEditor } from '../../core/index.js';
+import { resolvePlugins, type EditorPreset } from '../shared.js';
+import type { ThemeMode } from '../../core/render-svg/themes.js';
+
+export type { EditorPreset } from '../shared.js';
+export { useDslCodeMirror, type VueDslFieldOptions } from './use-dsl-codemirror.js';
+export { useCircuitWorkbench, type VueWorkbenchOptions } from './use-circuit-workbench.js';
 
 export interface VueEditorInstance {
   setValue(dsl: string): void;
@@ -21,15 +21,19 @@ export function createVueCircuitEditor(container: HTMLElement, options: {
   initialDsl?: string;
   width?: number;
   height?: number;
+  /** Editor UI preset: `extended` (default), `lite`, or `minimal` */
+  preset?: EditorPreset;
+  themeMode?: ThemeMode;
   onDslChange?: (dsl: string) => void;
   onEvent?: (e: { type: string; payload?: unknown }) => void;
 }): VueEditorInstance {
-  const editor = createEditor({ plugins: allPlugins() });
+  const editor = createEditor({ plugins: resolvePlugins(options.preset ?? 'extended') });
 
   editor.mount(container, {
     initialDsl: options.initialDsl,
     width: options.width,
     height: options.height,
+    themeMode: options.themeMode,
   });
 
   editor.on('ast-changed', () => {
@@ -71,6 +75,8 @@ export function useCircuitEditor(options: {
   value?: Ref<string>;
   width?: number;
   height?: number;
+  preset?: EditorPreset;
+  themeMode?: ThemeMode;
   onDslChange?: (dsl: string) => void;
   onEvent?: (e: { type: string; payload?: unknown }) => void;
 }): {
