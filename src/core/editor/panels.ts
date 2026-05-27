@@ -248,9 +248,11 @@ export function attachPropertiesEvents(container: HTMLElement, handlers: {
 
   const copyBtn = container.querySelector<HTMLButtonElement>('[data-action="copy-dsl"]');
   if (copyBtn) {
-    const handler = () => {
+    const handler = async () => {
       const dsl = container.querySelector<HTMLTextAreaElement>('.ce-dsl-textarea')?.value ?? '';
-      navigator.clipboard.writeText(dsl).catch(() => {});
+      const { copyTextToClipboard, flashButtonLabel } = await import('./export-utils.js');
+      const ok = await copyTextToClipboard(dsl);
+      if (ok) flashButtonLabel(copyBtn);
     };
     copyBtn.addEventListener('click', handler);
     cleanup.push(() => copyBtn.removeEventListener('click', handler));

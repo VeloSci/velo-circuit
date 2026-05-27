@@ -1,4 +1,15 @@
 export * from './core.js';
+export {
+  sanitizeDslFilename,
+  downloadTextFile,
+  copyTextToClipboard,
+  flashButtonLabel,
+} from './export-utils.js';
+export {
+  buildDownloadCircuitSvg,
+  serializeAstForExport,
+  type DownloadCircuitSvgOptions,
+} from './circuit-export.js';
 export * from './toolbar.js';
 export * from './panels.js';
 export * from './interaction.js';

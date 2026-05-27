@@ -220,6 +220,11 @@ export function createEditor(editorOpts?: { plugins?: EditorPlugin[]; strict?: S
       invalidElementIds: validation.hasErrors ? invalidIds : undefined,
     });
 
+    if (svg) {
+      svg.setAttribute('width', String(viewportWidth));
+      svg.setAttribute('height', String(viewportHeight));
+    }
+
     const connectionsEl = svg?.querySelector('#connections');
     const nodesEl = svg?.querySelector('#nodes');
     if (connectionsEl) connectionsEl.innerHTML = layers.connections;
