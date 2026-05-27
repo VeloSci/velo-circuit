@@ -24,6 +24,17 @@ export {
   type DslCodeMirrorHandle,
   type DslCodeMirrorTheme,
 } from './editor/dsl-codemirror.js';
+export {
+  sanitizeDslFilename,
+  downloadTextFile,
+  copyTextToClipboard,
+  flashButtonLabel,
+} from './editor/export-utils.js';
+export {
+  buildDownloadCircuitSvg,
+  serializeAstForExport,
+  type DownloadCircuitSvgOptions,
+} from './editor/circuit-export.js';
 export { buildContextMenuHTML, buildContextMenuCSS } from './editor/interaction.js';
 export type { ParseError } from './parser-bridge/parser.js';
 export {
