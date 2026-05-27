@@ -59,7 +59,7 @@ export function buildEditorSvgShell(
   theme: RenderTheme,
 ): string {
   return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${viewportWidth}" height="${viewportHeight}" class="circuit-editor-root" overflow="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" width="${viewportWidth}" height="${viewportHeight}" class="circuit-editor-root" overflow="visible">
   <style>
     .circuit-node { cursor: pointer; }
     .circuit-node:hover .node-bg { stroke: ${theme.colors.highlight}; stroke-width: calc(var(--ce-stroke-width, ${theme.strokeWidth}) * 1.25); }

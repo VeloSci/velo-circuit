@@ -153,6 +153,7 @@ export function buildPreviewThemeCSS(theme: RenderTheme, options: ThemeCSSOption
       height: auto;
       display: block;
       background: transparent;
+      background-color: transparent;
       color: ${theme.colors.text};
     }
     .circuit-preview .circuit-node text { fill: var(--ce-text); font-weight: 500; }

@@ -220,7 +220,7 @@ export function renderCircuit(
 
   if (preview) {
     return `
-<svg xmlns="http://www.w3.org/2000/svg"${sizeAttrs}${viewBoxAttr} class="${rootClass}" overflow="visible">
+<svg xmlns="http://www.w3.org/2000/svg"${sizeAttrs}${viewBoxAttr} class="${rootClass}" overflow="visible" fill="none">
   <g id="content-layer">
     <g id="connections">${layers.connections}</g>
     <g id="nodes">${layers.nodes}</g>
