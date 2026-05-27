@@ -19,7 +19,9 @@ const CSS = `
 .ce-canvas.ce-panning { cursor: grabbing; }
 .ce-canvas svg.circuit-editor-root {
   position: absolute; top: 0; left: 0;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 .ce-canvas svg #viewport {
   will-change: transform;

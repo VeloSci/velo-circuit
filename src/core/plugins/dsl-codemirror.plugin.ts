@@ -3,6 +3,7 @@ import { createDslCodeMirror, type DslCodeMirrorHandle } from '../editor/dsl-cod
 import { clearElementSymbolIconCache } from '../editor/element-symbol-icon.js';
 import { getTheme, type ThemeMode } from '../render-svg/themes.js';
 import { getOrCreateSidebar, type PanelPluginOptions } from './sidebar.plugin.js';
+import { copyTextToClipboard, flashButtonLabel } from '../editor/export-utils.js';
 
 const CSS = `
 .ce-dsl-codemirror {
@@ -99,8 +100,10 @@ export function dslCodemirrorPanelPlugin(opts?: PanelPluginOptions): EditorPlugi
 
       mountEditor();
 
-      header.querySelector('[data-act="copy"]')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(ctx.editor.getValue()).catch(() => {});
+      const copyBtn = header.querySelector<HTMLButtonElement>('[data-act="copy"]');
+      copyBtn?.addEventListener('click', async () => {
+        const ok = await copyTextToClipboard(ctx.editor.getValue());
+        if (ok && copyBtn) flashButtonLabel(copyBtn);
       });
 
       ctx.editor.on('ast-changed', () => {

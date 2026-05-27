@@ -1,4 +1,12 @@
 import type { EditorPlugin, PluginContext } from './types.js';
+import type { ThemeMode } from '../render-svg/themes.js';
+import { buildDownloadCircuitSvg, serializeAstForExport } from '../editor/circuit-export.js';
+import {
+  copyTextToClipboard,
+  downloadTextFile,
+  flashButtonLabel,
+  sanitizeDslFilename,
+} from '../editor/export-utils.js';
 
 const CSS = `
 .ce-sidebar {
@@ -100,8 +108,10 @@ export function dslPanelPlugin(opts?: PanelPluginOptions): EditorPlugin {
         }
       });
 
-      panel.querySelector('[data-act="copy"]')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(ctx.editor.getValue()).catch(() => {});
+      const copyBtn = panel.querySelector<HTMLButtonElement>('[data-act="copy"]');
+      copyBtn?.addEventListener('click', async () => {
+        const ok = await copyTextToClipboard(ctx.editor.getValue());
+        if (ok && copyBtn) flashButtonLabel(copyBtn);
       });
 
       ctx.editor.on('ast-changed', () => { textarea.value = ctx.editor.getValue(); });
@@ -164,13 +174,22 @@ export function diagnosticsPlugin(opts?: PanelPluginOptions): EditorPlugin {
 // ──── Export Panel ────
 
 const EXPORT_CSS = `
-.ce-export-btns { display: flex; gap: 4px; }
+.ce-export-btns { display: flex; flex-wrap: wrap; gap: 4px; }
 .ce-export-btns button {
-  flex: 1; padding: 5px; border: 1px solid var(--ce-border); border-radius: 5px;
+  flex: 1 1 calc(50% - 2px); min-width: 0; padding: 5px; border: 1px solid var(--ce-border); border-radius: 5px;
   background: var(--ce-surface); cursor: pointer; font: 400 10px var(--ce-font);
   color: var(--ce-text-secondary); transition: all .12s;
 }
+.ce-export-btns button[data-act="dsl"] { flex: 1 1 100%; }
 .ce-export-btns button:hover { background: var(--ce-hover); border-color: var(--ce-accent); }
+.ce-export-opt {
+  display: flex; align-items: center; gap: 6px; margin-top: 8px;
+  font: 400 10px var(--ce-font); color: var(--ce-text-secondary); cursor: pointer;
+}
+.ce-export-opt input { margin: 0; cursor: pointer; }
+.ce-export-hint {
+  margin-top: 6px; font: 400 9px var(--ce-font); color: var(--ce-text-secondary); line-height: 1.35;
+}
 `;
 
 export function exportPanelPlugin(opts?: PanelPluginOptions): EditorPlugin {
@@ -182,8 +201,6 @@ export function exportPanelPlugin(opts?: PanelPluginOptions): EditorPlugin {
       ctx = c;
       ctx.injectCSS('export-panel', EXPORT_CSS);
 
-      ctx.injectCSS('export-panel', EXPORT_CSS);
-
       const targetContainer = resolveContainer(ctx, opts?.container);
       const panel = document.createElement('div');
       panel.className = 'ce-panel';
@@ -191,17 +208,48 @@ export function exportPanelPlugin(opts?: PanelPluginOptions): EditorPlugin {
         <div class="ce-panel-header">Export</div>
         <div class="ce-panel-body">
           <div class="ce-export-btns">
-            <button data-act="svg">📐 SVG</button>
-            <button data-act="dsl">📋 DSL</button>
+            <button type="button" data-act="svg-params" title="SVG with parameters (transparent background)">📐 SVG</button>
+            <button type="button" data-act="svg-topo" title="SVG without parameter values (transparent background)">📐 SVG topo</button>
+            <button type="button" data-act="dsl" title="Full Boukamp DSL with all parameter values">📋 DSL</button>
           </div>
+          <label class="ce-export-opt">
+            <input type="checkbox" data-opt="dark-theme" />
+            Dark export theme
+          </label>
+          <p class="ce-export-hint">Exports use light theme and transparent background unless dark is checked. Filenames match the exported DSL string.</p>
         </div>`;
       targetContainer.appendChild(panel);
 
-      panel.querySelector('[data-act="svg"]')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(ctx.editor.render()).catch(() => {});
+      const darkThemeCheck = panel.querySelector<HTMLInputElement>('[data-opt="dark-theme"]');
+      const exportThemeMode = (): ThemeMode => (darkThemeCheck?.checked ? 'dark' : 'light');
+
+      const downloadSvg = (showParams: boolean, button: HTMLButtonElement | null) => {
+        const ast = ctx.editor.getDocument().ast;
+        const dsl = serializeAstForExport(ast, showParams);
+        const svg = buildDownloadCircuitSvg(dsl, {
+          themeMode: exportThemeMode(),
+          showParams,
+        });
+        if (!svg) return;
+        downloadTextFile(
+          sanitizeDslFilename(dsl, 'svg'),
+          svg,
+          'image/svg+xml;charset=utf-8',
+        );
+        if (button) flashButtonLabel(button, '✓');
+      };
+
+      panel.querySelector<HTMLButtonElement>('[data-act="svg-params"]')?.addEventListener('click', e => {
+        downloadSvg(true, (e.currentTarget as HTMLButtonElement));
       });
-      panel.querySelector('[data-act="dsl"]')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(ctx.editor.getValue()).catch(() => {});
+      panel.querySelector<HTMLButtonElement>('[data-act="svg-topo"]')?.addEventListener('click', e => {
+        downloadSvg(false, (e.currentTarget as HTMLButtonElement));
+      });
+      panel.querySelector<HTMLButtonElement>('[data-act="dsl"]')?.addEventListener('click', e => {
+        const ast = ctx.editor.getDocument().ast;
+        const dslFull = serializeAstForExport(ast, true);
+        downloadTextFile(sanitizeDslFilename(dslFull, 'dsl'), dslFull);
+        flashButtonLabel(e.currentTarget as HTMLButtonElement, '✓');
       });
     },
     destroy() {},
