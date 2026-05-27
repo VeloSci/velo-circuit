@@ -16,6 +16,7 @@ Framework-agnostic SVG circuit editor for Boukamp DSL circuits used in electroch
 - `createCircuitGrid()` catalog view (DSL + SVG columns) and editor grid mode
 - Full parity with `velo-spectroz` circuit elements (11 types including `CC`, `HN`)
 - Designed to integrate with scientific tooling such as `velo-spectroz`
+- **Sidebar export** (extended preset): SVG with/without parameters, full DSL download, optional dark export theme; transparent SVG background by default
 
 ## Element types (11)
 

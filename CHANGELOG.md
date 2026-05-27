@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- **Export panel downloads:** SVG with parameters, **SVG topo** without parameters, and full **DSL** (always includes `{…}` values); optional **Dark export theme** checkbox (default light); SVG uses transparent background regardless of theme
+- **`buildDownloadCircuitSvg()`** / **`serializeAstForExport()`** for programmatic exports
+- **Copy DSL feedback:** clipboard helper with `execCommand` fallback and brief ✓ confirmation on the sidebar copy button
+- Public helpers: `sanitizeDslFilename`, `downloadTextFile`, `copyTextToClipboard`, `flashButtonLabel`
+- [Export and download](./docs/guide/export-download.md) guide and [AGENTS.md](./AGENTS.md) for agent workflows
+
+### Fixed
+
+- **Tall circuits + pan:** editor SVG no longer clips circuit geometry before the canvas edge when panning vertically (`overflow: visible` on `circuit-editor-root`; SVG size tracks viewport on resize)
+- Export sidebar buttons previously copied to clipboard only (often silent failure); they now trigger file downloads as documented
+
+### Changed
+
+- LICENSE copyright line: `2024-2026 velo-circuit authors`
+
 ## [1.0.0] — 2026-05-23
 
 ### Added
