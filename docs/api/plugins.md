@@ -43,7 +43,7 @@ Framework adapters accept the same presets via `preset: 'lite' | 'extended' | 'm
 | `gridViewPlugin()` | `grid-view` | Catalog grid inside editor (`viewMode: 'grid'`) |
 | `dslCodemirrorPanelPlugin()` | `dsl-codemirror-panel` | Boukamp DSL CodeMirror side panel |
 | `diagnosticsPlugin()` | `diagnostics` | Validation issues panel |
-| `exportPanelPlugin()` | `export-panel` | SVG export panel |
+| `exportPanelPlugin()` | `export-panel` | SVG (params), SVG topo, full DSL; light/transparent by default — [Export guide](/guide/export-download) |
 
 ### Optional (not in presets)
 
