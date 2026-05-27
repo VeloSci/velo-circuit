@@ -40,6 +40,7 @@ export default defineConfig({
           { text: 'Architecture', link: '/guide/architecture' },
           { text: 'Core Concepts', link: '/guide/core-concepts' },
           { text: 'Editor Presets', link: '/guide/editor-presets' },
+          { text: 'Export and Download', link: '/guide/export-download' },
           { text: 'Boukamp DSL', link: '/guide/boukamp-dsl' },
           { text: 'Migration to v1.0', link: '/guide/migration-v1' },
           { text: 'Release and Publish', link: '/guide/release-and-publish' },
